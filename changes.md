@@ -7,6 +7,7 @@
 - **Tailwind Config:** Added inline Tailwind configuration to `index.html` to define custom animations and suppress production warnings where possible.
 - **Path Resolution:** Used relative path for script source to support subdirectory deployments (e.g., GitHub Pages).
 - **Slide Layout:** Updated `Slide` component to ensure the live clock is always z-indexed above slide content and that the content layout reserves space at the bottom when the clock is active.
+- **Deployment:** Added `vite.config.ts` with base URL configuration for GitHub Pages hosting.
 
 ### Added
 - **Perpetual Countdown:** The application now defaults to a countdown mode targeting the next configured service time (default: Wednesday 6:00 PM) instead of a standby screen.
