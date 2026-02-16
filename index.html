@@ -71,22 +71,277 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
-    "react/": "https://esm.sh/react@18.2.0/"
-  }
-}
-</script>
-<!-- Babel Standalone for in-browser transpilation -->
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- UMD Scripts for React and ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel Standalone for in-browser transpilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
   <body class="bg-black text-white h-screen w-screen overflow-hidden">
     <div id="root" class="h-full w-full"></div>
-    <!-- Changed type to "text/babel" to enable transpilation -->
-    <script type="text/babel" data-presets="react,typescript" src="./index.tsx"></script>
+    <!-- Application code source -->
+    <script id="app-source" type="text/tsx">
+// React and ReactDOM are now globally available from the UMD scripts
+// Destructure hooks and components from the global React object
+const { useState, useEffect, useCallback, useMemo } = React;
+
+// ============================================================================
+// === TYPES
+// ============================================================================
+
+enum AppMode {
+  COUNTDOWN = 'COUNTDOWN',
+  SLIDESHOW = 'SLIDESHOW',
+}
+
+interface SlideContent {
+  id: number;
+  title: string;
+  body?: string;
+  imageUrl?: string;
+  bgColorClass: string; // Tailwind class for background
+  accentColorClass: string; // Tailwind class for text accents
+  duration?: number; // Duration in seconds before auto-advancing
+  showClock?: boolean;
+}
+
+// ============================================================================
+// === CONSTANTS
+// ============================================================================
+
+const US_PLEDGE_TEXT = `I pledge allegiance to the Flag of the United States of America, and to the Republic for which it stands, one Nation under God, indivisible, with liberty and justice for all.`;
+const AWANA_PLEDGE_TEXT = `I pledge allegiance to the Awana flag, which stands for the Awana clubs, whose goal is to reach boys and girls with the gospel of Christ, and train them to serve Him.`;
+
+const SLIDES: SlideContent[] = [
+  { id: 1, title: 'Welcome!', bgColorClass: 'bg-black', accentColorClass: 'text-yellow-400', duration: 10 },
+  { id: 2, title: 'Pledge of Allegiance', body: US_PLEDGE_TEXT, bgColorClass: 'bg-black', accentColorClass: 'text-white', showClock: true },
+  { id: 3, title: 'Awana Pledge', body: AWANA_PLEDGE_TEXT, bgColorClass: 'bg-black', accentColorClass: 'text-white', showClock: true },
+  { id: 4, title: 'Have a great night!', body: 'See you next week!', bgColorClass: 'bg-black', accentColorClass: 'text-blue-400' }
+];
+
+
+// ============================================================================
+// === COMPONENTS
+// ============================================================================
+
+// --- Slide.tsx ---
+interface SlideProps {
+  content: SlideContent;
+  isExiting?: boolean;
+  onNext?: () => void;
+}
+const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext }) => {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => { const timer = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(timer); }, []);
+
+  const isWelcomeSlide = content.id === 1;
+  const timeString = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+  const transitionClasses = `transition-all duration-500 ease-in-out transform ${isExiting ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'}`;
+  const hasBody = !!content.body;
+  const isLongText = hasBody && content.body!.length > 60;
+  const bodyClass = isLongText ? "text-4xl md:text-5xl lg:text-6xl leading-tight max-w-6xl font-bold" : "text-7xl md:text-8xl lg:text-9xl leading-none font-black uppercase tracking-tight";
+  const titleClass = hasBody ? "text-4xl md:text-5xl font-bold mb-6 opacity-80 uppercase tracking-widest" : "text-7xl md:text-8xl font-bold mb-8";
+  const titleAnimation = (isWelcomeSlide && !isExiting) ? 'animate-pop-in' : '';
+  const subtitleAnimation = (isWelcomeSlide && !isExiting) ? 'animate-slide-up-fade' : 'opacity-0';
+  const contentPadding = content.showClock ? 'pb-32' : 'pb-8';
+
+  return (
+    <div className={`w-full h-full flex flex-col items-center justify-center ${content.bgColorClass} relative overflow-hidden`}>
+      <div className={`flex flex-col items-center justify-center text-center px-8 w-full z-10 ${contentPadding} ${transitionClasses}`}>
+        {content.title && <h1 className={`${titleClass} ${content.accentColorClass} drop-shadow-md ${titleAnimation}`}>{content.title}</h1>}
+        {isWelcomeSlide && <div className={`text-3xl md:text-4xl text-gray-300 font-light mt-4 ${subtitleAnimation}`}>We're glad you're here!</div>}
+        {content.imageUrl ? <img src={content.imageUrl} alt="Slide" className="max-h-[65vh] w-auto border-4 border-gray-800 shadow-2xl rounded-lg" /> : content.body && <div className={`${bodyClass} ${content.accentColorClass} drop-shadow-xl break-words`}>{content.body}</div>}
+      </div>
+      {(content.showClock) && (
+        <div className={`absolute bottom-8 left-0 w-full flex flex-col items-center justify-center pointer-events-none z-20 ${transitionClasses}`}>
+          <div className="text-5xl font-mono font-bold text-white tabular-nums drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">{timeString}</div>
+        </div>
+      )}
+      <button onClick={onNext} className="absolute inset-y-0 right-0 w-24 opacity-0 hover:opacity-0 transition-opacity cursor-pointer z-50 focus:outline-none" title="Next Slide" aria-label="Next Slide" />
+    </div>
+  );
+};
+
+// --- CountdownView.tsx ---
+interface CountdownViewProps { onComplete: () => void; targetDate: Date; }
+const PARTICLE_COLORS = ['bg-red-600', 'bg-blue-600', 'bg-green-600', 'bg-yellow-500'];
+interface Particle { id: number; left: string; size: string; color: string; duration: string; delay: string; }
+const CountdownView: React.FC<CountdownViewProps> = ({ onComplete, targetDate }) => {
+  const [timeLeft, setTimeLeft] = useState(0);
+  const particles = useMemo(() => Array.from({ length: 30 }, (_, i) => ({ id: i, left: `${Math.random() * 100}%`, size: `${Math.random() * 3 + 1}rem`, color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)], duration: `${Math.random() * 10 + 10}s`, delay: `-${Math.random() * 20}s` })), []);
+  
+  useEffect(() => {
+    const calculateTimeLeft = () => { const distance = targetDate.getTime() - new Date().getTime(); if (distance <= 0) { onComplete(); return 0; } return Math.floor(distance / 1000); };
+    setTimeLeft(calculateTimeLeft());
+    const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
+    return () => clearInterval(timer);
+  }, [targetDate, onComplete]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => { if (['Space', 'ArrowRight', 'PageDown'].includes(event.code)) { event.preventDefault(); onComplete(); } };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onComplete]);
+
+  const days = Math.floor(timeLeft / 86400);
+  const hours = Math.floor((timeLeft % 86400) / 3600);
+  const minutes = Math.floor((timeLeft % 3600) / 60);
+  const seconds = timeLeft % 60;
+  let formattedTime = days > 0 ? `${days}d ${hours}h ${minutes}m` : hours > 0 ? `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` : `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center bg-black relative overflow-hidden animate-fade-in">
+      <div className="absolute inset-0 pointer-events-none">{particles.map(p => <div key={p.id} className={`rounded-full animate-float ${p.color} blur-sm`} style={{ left: p.left, width: p.size, height: p.size, animationDuration: p.duration, animationDelay: p.delay }} />)}</div>
+      <div className="z-10 w-full h-full flex flex-col items-center justify-center">
+        <h2 className="text-4xl text-gray-400 font-bold mb-8 uppercase tracking-widest">Club Starts In</h2>
+        <div className="relative w-full flex justify-center items-center cursor-pointer group" onClick={onComplete} title="Click to skip timer">
+          <h1 className={`${days > 0 ? 'text-[12vw]' : 'text-[25vw]'} leading-none font-bold tabular-nums drop-shadow-2xl transition-colors duration-500 ${timeLeft < 60 && timeLeft > 0 ? 'text-red-500' : 'text-white'} group-hover:text-gray-200`}>{formattedTime}</h1>
+          <div className="absolute bottom-0 opacity-0 group-hover:opacity-100 text-sm text-gray-500 font-semibold uppercase tracking-widest transition-opacity">Click to Skip</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- SlideshowView.tsx ---
+interface SlideshowViewProps { onExit: () => void; }
+const SlideshowView: React.FC<SlideshowViewProps> = ({ onExit }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isExiting, setIsExiting] = useState(false);
+  const TRANSITION_DURATION = 500;
+
+  const activeSlides = SLIDES;
+
+  const changeSlide = useCallback((newIndex: number) => { setIsExiting(true); setTimeout(() => { setCurrentIndex(newIndex); setIsExiting(false); }, TRANSITION_DURATION); }, []);
+  const goToNext = useCallback(() => { if (currentIndex < activeSlides.length - 1 && !isExiting) { changeSlide(currentIndex + 1); } }, [currentIndex, isExiting, changeSlide, activeSlides.length]);
+  const goToPrev = useCallback(() => { if (currentIndex > 0 && !isExiting) { changeSlide(currentIndex - 1); } }, [currentIndex, isExiting, changeSlide]);
+  
+  useEffect(() => {
+    const currentSlide = activeSlides[currentIndex];
+    if (currentSlide.duration && !isExiting) {
+      const timer = setTimeout(() => { if (currentIndex < activeSlides.length - 1) { goToNext(); } }, currentSlide.duration * 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex, activeSlides, isExiting, goToNext]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isExiting) return;
+      if (['Space', 'ArrowRight', 'PageDown'].includes(event.code)) { event.preventDefault(); goToNext(); } 
+      else if (['ArrowLeft', 'PageUp'].includes(event.code)) { event.preventDefault(); goToPrev(); } 
+      else if (event.code === 'Escape' && confirm("Exit Presentation Mode?")) { onExit(); }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [goToNext, goToPrev, onExit, isExiting]);
+
+  return (
+    <div className="w-full h-full relative group bg-black">
+      <Slide content={activeSlides[currentIndex]} isExiting={isExiting} onNext={goToNext} />
+      <div className="fixed bottom-8 right-8 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+        <button onClick={goToPrev} disabled={currentIndex === 0 || isExiting} className="p-3 bg-gray-800/50 rounded-full text-white disabled:opacity-30 hover:bg-gray-700 transition-colors"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg></button>
+        <button onClick={goToNext} disabled={currentIndex === activeSlides.length - 1 || isExiting} className="p-3 bg-gray-800/50 rounded-full text-white disabled:opacity-30 hover:bg-gray-700 transition-colors"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg></button>
+      </div>
+    </div>
+  );
+};
+
+// --- App.tsx ---
+const App: React.FC = () => {
+  const [mode, setMode] = useState<AppMode>(AppMode.COUNTDOWN);
+
+  const getNextTargetDate = useCallback(() => {
+    const now = new Date();
+    const target = new Date();
+    // Hard-coded target: Wednesday (3) at 6:00 PM (18:00)
+    const targetDay = 3;
+    const targetHour = 18;
+    const targetMinute = 0;
+    
+    target.setHours(targetHour, targetMinute, 0, 0);
+    let daysUntil = (targetDay - now.getDay() + 7) % 7;
+    if (daysUntil === 0 && target <= now) { daysUntil = 7; }
+    target.setDate(now.getDate() + daysUntil);
+    return target;
+  }, []);
+
+  const nextTargetDate = useMemo(() => getNextTargetDate(), [getNextTargetDate]);
+  const handleCountdownComplete = useCallback(() => setMode(AppMode.SLIDESHOW), []);
+  const handleReturnToCountdown = useCallback(() => setMode(AppMode.COUNTDOWN), []);
+  
+  return (
+    <div className="w-full h-full relative">
+      {mode === AppMode.COUNTDOWN && <CountdownView targetDate={nextTargetDate} onComplete={handleCountdownComplete} />}
+      {mode === AppMode.SLIDESHOW && <SlideshowView onExit={handleReturnToCountdown} />}
+    </div>
+  );
+};
+
+// ============================================================================
+// === ROOT RENDER LOGIC
+// ============================================================================
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: Error | null }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) { console.error("Uncaught error:", error, errorInfo); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center h-screen w-screen bg-gray-900 text-white p-8">
+          <h1 className="text-3xl font-bold text-red-500 mb-4">Something went wrong.</h1>
+          <div className="bg-black p-4 rounded border border-gray-700 max-w-2xl overflow-auto">
+            <p className="font-mono text-sm text-red-300">{this.state.error?.toString()}</p>
+            <p className="mt-4 text-gray-400 text-sm">Check the console for more details.</p>
+          </div>
+          <button onClick={() => window.location.reload()} className="mt-8 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold">Reload Application</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error("Could not find root element to mount to");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  </React.StrictMode>
+);
+    </script>
+    <script>
+      // Explicitly transpile and execute the application code
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Babel === 'undefined') {
+          console.error("Babel Standalone is not loaded. Cannot transpile application code.");
+          // Fallback or error display if Babel isn't available
+          return;
+        }
+        const appSource = document.getElementById('app-source');
+        if (appSource) {
+          try {
+            const transpiledCode = Babel.transform(appSource.textContent, {
+              presets: ['react', 'typescript']
+            }).code;
+            eval(transpiledCode);
+          } catch (e) {
+            console.error("Error transpiling or executing application code:", e);
+            if (window.onerror) {
+              window.onerror(e.message, 'in-browser-transpilation', 0, 0, e);
+            }
+          }
+        }
+      });
+    </script>
   </body>
 </html>
