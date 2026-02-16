@@ -65,11 +65,14 @@ export const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext
     ? "text-4xl md:text-5xl font-bold mb-6 opacity-80 uppercase tracking-widest"
     : "text-7xl md:text-8xl font-bold mb-8";
 
+  // Dynamic Padding: If clock is shown, add more bottom padding to main content so it visually centers above the clock
+  const contentPadding = content.showClock ? 'pb-32' : 'pb-8';
+
   return (
     <div className={`w-full h-full flex flex-col items-center justify-center ${content.bgColorClass} relative overflow-hidden`}>
       
       {/* Main Content Container */}
-      <div className={`flex flex-col items-center justify-center text-center p-8 w-full z-10 ${transitionClasses}`}>
+      <div className={`flex flex-col items-center justify-center text-center px-8 w-full z-10 ${contentPadding} ${transitionClasses}`}>
         
         {/* Title */}
         {content.title && (
@@ -105,9 +108,9 @@ export const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext
 
       {/* Footer Area: Clock & Special Messages */}
       {(content.showClock) && (
-        <div className={`absolute bottom-8 left-0 w-full flex flex-col items-center justify-center pointer-events-none ${transitionClasses}`}>
+        <div className={`absolute bottom-8 left-0 w-full flex flex-col items-center justify-center pointer-events-none z-20 ${transitionClasses}`}>
            {/* Real Time Clock - Pure White */}
-           <div className="text-5xl font-mono font-bold text-white tabular-nums drop-shadow-md">
+           <div className="text-5xl font-mono font-bold text-white tabular-nums drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
               {timeString}
            </div>
            
