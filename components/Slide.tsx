@@ -42,6 +42,9 @@ export const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext
 
   // Check if this is the "Power Off" slide (ID 1004)
   const isPowerOffSlide = content.id === 1004;
+  
+  // Check if this is the Welcome Slide (ID 1)
+  const isWelcomeSlide = content.id === 1;
 
   // Format main clock
   const timeString = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
@@ -65,6 +68,11 @@ export const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext
     ? "text-4xl md:text-5xl font-bold mb-6 opacity-80 uppercase tracking-widest"
     : "text-7xl md:text-8xl font-bold mb-8";
 
+  // Animation Classes for Welcome Slide
+  // Only apply entrance animations if we are NOT exiting
+  const titleAnimation = (isWelcomeSlide && !isExiting) ? 'animate-pop-in' : '';
+  const subtitleAnimation = (isWelcomeSlide && !isExiting) ? 'animate-slide-up-fade' : 'opacity-0';
+
   // Dynamic Padding: If clock is shown, add more bottom padding to main content so it visually centers above the clock
   const contentPadding = content.showClock ? 'pb-32' : 'pb-8';
 
@@ -76,9 +84,16 @@ export const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext
         
         {/* Title */}
         {content.title && (
-          <h1 className={`${titleClass} ${content.accentColorClass} drop-shadow-md`}>
+          <h1 className={`${titleClass} ${content.accentColorClass} drop-shadow-md ${titleAnimation}`}>
             {content.title}
           </h1>
+        )}
+        
+        {/* Special Welcome Subtitle - Animated */}
+        {isWelcomeSlide && (
+            <div className={`text-3xl md:text-4xl text-gray-300 font-light mt-4 ${subtitleAnimation}`}>
+                We're glad you're here!
+            </div>
         )}
 
         {/* Content Body or Image */}
