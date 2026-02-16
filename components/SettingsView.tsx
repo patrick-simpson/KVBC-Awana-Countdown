@@ -17,7 +17,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentSettings, onS
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
-    if (name === 'countdownDurationMinutes' || name === 'autoStartDay' || name === 'autoStartHour' || name === 'autoStartMinute') {
+    if (name === 'autoStartDay' || name === 'autoStartHour' || name === 'autoStartMinute' || name === 'countdownDurationMinutes') {
         setFormData(prev => ({
           ...prev,
           [name]: parseInt(value, 10)
@@ -56,22 +56,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentSettings, onS
         
         <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* Countdown Duration */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Countdown Duration (Minutes)</label>
-            <input
-              type="number"
-              name="countdownDurationMinutes"
-              min="1"
-              max="60"
-              value={formData.countdownDurationMinutes}
-              onChange={handleChange}
-              className="w-full bg-black border border-gray-700 rounded-md p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            />
-          </div>
-
-          <div className="border-t border-gray-800 pt-4">
-            <h3 className="text-xl font-semibold mb-4 text-blue-300">Auto-Start Automation</h3>
+          <div className="border-b border-gray-800 pb-6">
+            <h3 className="text-xl font-semibold mb-4 text-blue-300">Countdown Target</h3>
+            <p className="text-sm text-gray-400 mb-4">Set the day and time for your club. The timer will always count down to the next occurrence of this time.</p>
             
             {/* Day of Week */}
             <div className="mb-4">
@@ -89,7 +76,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentSettings, onS
             </div>
 
             {/* Time */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Hour (0-23)</label>
                 <input
@@ -101,7 +88,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentSettings, onS
                   onChange={handleChange}
                   className="w-full bg-black border border-gray-700 rounded-md p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
-                <p className="text-xs text-gray-500 mt-1">17 = 5 PM</p>
+                <p className="text-xs text-gray-500 mt-1">18 = 6 PM</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Minute (0-59)</label>
@@ -116,9 +103,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentSettings, onS
                 />
               </div>
             </div>
+
+            {/* Manual Countdown Duration */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-1">Manual Countdown Duration (Minutes)</label>
+              <input
+                type="number"
+                name="countdownDurationMinutes"
+                min="1"
+                max="60"
+                value={formData.countdownDurationMinutes}
+                onChange={handleChange}
+                className="w-full bg-black border border-gray-700 rounded-md p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+
           </div>
 
-          <div className="border-t border-gray-800 pt-4">
+          <div className="pt-2">
             <h3 className="text-xl font-semibold mb-4 text-green-400">Final Slide Configuration</h3>
             
             <div className="mb-4">

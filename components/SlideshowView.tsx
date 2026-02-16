@@ -92,6 +92,21 @@ export const SlideshowView: React.FC<SlideshowViewProps> = ({ onExit, settings }
     return () => clearInterval(timer);
   }, [activeSlides, currentIndex, changeSlide]);
 
+  // Auto-advance logic for slides with specific duration
+  useEffect(() => {
+    const currentSlide = activeSlides[currentIndex];
+    if (currentSlide.duration && !isExiting) {
+      const durationMs = currentSlide.duration * 1000;
+      const timer = setTimeout(() => {
+        if (currentIndex < activeSlides.length - 1) {
+            goToNext();
+        }
+      }, durationMs);
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex, activeSlides, isExiting, goToNext]);
+
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Block input during transition

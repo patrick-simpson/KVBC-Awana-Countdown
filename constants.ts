@@ -1,11 +1,12 @@
 import { SlideContent, AppSettings } from './types';
 
 // DEFAULT SETTINGS
+// Defaults to Wednesday at 6:00 PM
 export const DEFAULT_SETTINGS: AppSettings = {
-  countdownDurationMinutes: 5,
   autoStartDay: 3, // Wednesday
-  autoStartHour: 17, // 5 PM
-  autoStartMinute: 55, // 55 Minutes
+  autoStartHour: 18, // 6 PM
+  autoStartMinute: 0, // 00 Minutes
+  countdownDurationMinutes: 5, // Default manual countdown duration
   finalSlideType: 'black',
   finalSlideContent: '',
 };
@@ -23,6 +24,7 @@ export const SLIDES: SlideContent[] = [
     bgColorClass: 'bg-black',
     accentColorClass: 'text-yellow-400',
     imagePlaceholder: false,
+    duration: 10, // Show for 10 seconds then auto-advance
   },
   {
     id: 2,
