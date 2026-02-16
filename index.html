@@ -5,35 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Awana Presentation Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            animation: {
+              'float': 'floatUp linear infinite',
+              'fade-in': 'fadeIn 0.5s ease-out',
+            },
+            keyframes: {
+              floatUp: {
+                '0%': { transform: 'translateY(110vh) rotate(0deg)', opacity: '0' },
+                '10%': { opacity: '0.6' },
+                '90%': { opacity: '0.6' },
+                '100%': { transform: 'translateY(-20vh) rotate(360deg)', opacity: '0' },
+              },
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              }
+            }
+          }
+        }
+      }
+    </script>
     <style>
       /* Custom font adjustments for maximum legibility */
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         overflow: hidden; /* Prevent scrolling during presentation */
-      }
-
-      /* Floating Animation for Countdown Particles */
-      @keyframes floatUp {
-        0% {
-          transform: translateY(110vh) rotate(0deg);
-          opacity: 0;
-        }
-        10% {
-          opacity: 0.6;
-        }
-        90% {
-          opacity: 0.6;
-        }
-        100% {
-          transform: translateY(-20vh) rotate(360deg);
-          opacity: 0;
-        }
-      }
-
-      .animate-float {
-        animation: floatUp linear infinite;
-        position: absolute;
-        bottom: -20vh; /* Start below screen */
       }
     </style>
   <script type="importmap">
@@ -48,5 +48,6 @@
 </head>
   <body class="bg-black text-white h-screen w-screen overflow-hidden">
     <div id="root" class="h-full w-full"></div>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

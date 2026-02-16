@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+- **App Loading:** Added missing script entry point to `index.html` to ensure the React application mounts.
+- **Tailwind Config:** Added inline Tailwind configuration to `index.html` to define custom animations and suppress production warnings where possible.
+- **Path Resolution:** Used relative path for script source to support subdirectory deployments (e.g., GitHub Pages).
+
 ### Added
 - **Perpetual Countdown:** The application now defaults to a countdown mode targeting the next configured service time (default: Wednesday 6:00 PM) instead of a standby screen.
 - **Slide Duration:** Added support for auto-advancing slides after a specific duration.
@@ -12,6 +17,3 @@
 - **App Flow:** Removed `StandbyView`. The app flow is now `Countdown` -> `Slideshow` -> `Countdown`.
 - **Settings:** Removed "Countdown Duration" setting as the timer is now based on the calendar target.
 - **Visuals:** Updated Countdown timer to show Days/Hours/Minutes/Seconds to accommodate longer durations.
-
-### Fixed
-- **Navigation:** Ensure settings can be accessed and closed without resetting the target time incorrectly.
