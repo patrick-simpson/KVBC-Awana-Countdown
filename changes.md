@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Fixed
+- **React Render Error:** Corrected a critical React error (#31) caused by a version mismatch between React 18 and React 19 in the `importmap`. All React-related imports have been unified to version 18.2.0, ensuring compatibility with the in-browser JSX transpiler.
 - **CRITICAL: Black Screen on Deploy:** Resolved the persistent black screen issue. The root cause was the browser attempting to load `.tsx` files directly without compilation. The fix involves adding Babel Standalone to `index.html` to transpile TypeScript and JSX into plain JavaScript directly in the browser.
 - **App Loading:** Added missing script entry point to `index.html` to ensure the React application mounts.
 - **Tailwind Config:** Added inline Tailwind configuration to `index.html` to define custom animations and suppress production warnings where possible.
