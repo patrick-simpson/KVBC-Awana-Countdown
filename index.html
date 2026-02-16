@@ -4,6 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Awana Presentation Tool</title>
+    <!-- GLOBAL ERROR HANDLER: Prints errors to screen if app fails to load -->
+    <script>
+      window.onerror = function(message, source, lineno, colno, error) {
+        var div = document.createElement('div');
+        div.style.position = 'fixed';
+        div.style.top = '0';
+        div.style.left = '0';
+        div.style.width = '100%';
+        div.style.backgroundColor = 'white';
+        div.style.color = 'red';
+        div.style.padding = '20px';
+        div.style.zIndex = '9999';
+        div.style.fontFamily = 'monospace';
+        div.style.borderBottom = '2px solid red';
+        div.innerHTML = '<strong>Application Error:</strong><br>' + message + '<br><small>' + source + ':' + lineno + '</small>';
+        document.body.appendChild(div);
+      };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -30,10 +48,16 @@
       }
     </script>
     <style>
-      /* Custom font adjustments for maximum legibility */
+      html, body, #root {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: black; /* Default to black to match theme */
+      }
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow: hidden; /* Prevent scrolling during presentation */
       }
     </style>
   <script type="importmap">
