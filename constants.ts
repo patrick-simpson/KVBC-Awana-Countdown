@@ -16,7 +16,8 @@ export const SCHEDULE: ScheduleItem[] = [
     endHour: 18, endMinute: 30,
     title: 'T&T Game Time',
     bgColorClass: 'bg-red-900',
-    accentColorClass: 'text-red-100',
+    accentColorClass: 'text-red-400',
+    clubColor: '#E8192C',
     mode: AppMode.GAME_TIME
   },
   {
@@ -24,7 +25,8 @@ export const SCHEDULE: ScheduleItem[] = [
     endHour: 19, endMinute: 0,
     title: 'Sparks Game Time',
     bgColorClass: 'bg-blue-900',
-    accentColorClass: 'text-blue-100',
+    accentColorClass: 'text-blue-400',
+    clubColor: '#0072CE',
     mode: AppMode.GAME_TIME
   },
   {
@@ -32,7 +34,8 @@ export const SCHEDULE: ScheduleItem[] = [
     endHour: 19, endMinute: 30,
     title: 'Puggles & Cubbies Game Time',
     bgColorClass: 'bg-green-900',
-    accentColorClass: 'text-green-100',
+    accentColorClass: 'text-green-400',
+    clubColor: '#00A651',
     mode: AppMode.GAME_TIME
   },
   {
@@ -47,8 +50,8 @@ export const SCHEDULE: ScheduleItem[] = [
     startHour: 19, startMinute: 35,
     endHour: 23, endMinute: 59,
     title: 'System Shutdown',
-    bgColorClass: 'bg-zinc-950',
-    accentColorClass: 'text-red-600',
+    bgColorClass: 'bg-black',
+    accentColorClass: 'text-slate-400',
     mode: AppMode.SHUTDOWN
   }
 ];

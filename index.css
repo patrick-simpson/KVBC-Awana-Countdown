@@ -4,28 +4,29 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  @keyframes floatUp {
-    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
-    10% { opacity: 0.6; }
-    90% { opacity: 0.6; }
-    100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
-  @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+  @keyframes orbitDrift {
+    0%   { transform: translate(0px, 0px) scale(1); }
+    25%  { transform: translate(22px, -38px) scale(1.04); }
+    50%  { transform: translate(-18px, 28px) scale(0.97); }
+    75%  { transform: translate(28px, 12px) scale(1.02); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   @keyframes popIn {
-    0% { opacity: 0; transform: scale(0.5); }
-    60% { opacity: 1; transform: scale(1.1); }
+    0%   { opacity: 0; transform: scale(0.6); }
+    65%  { opacity: 1; transform: scale(1.04); }
     100% { opacity: 1; transform: scale(1); }
   }
   @keyframes slideUpFade {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 }
 
@@ -39,22 +40,29 @@
     background-color: black;
   }
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   }
 }
 
-.animate-float {
-  animation: floatUp linear infinite;
+/* 4-color Awana brand gradient bar */
+.brand-bar-animated {
+  background: linear-gradient(90deg, #E8192C, #FFC107, #0072CE, #00A651, #E8192C);
+  background-size: 300% 100%;
+  animation: gradientShift 12s ease infinite;
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out;
+.animate-orbit {
+  animation: orbitDrift ease-in-out infinite;
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s ease-out forwards;
 }
 
 .animate-pop-in {
-  animation: popIn 0.8s cubic-bezier(0.26, 0.53, 0.74, 1.48) forwards;
+  animation: popIn 0.9s cubic-bezier(0.26, 0.53, 0.74, 1.48) forwards;
 }
 
 .animate-slide-up-fade {
-  animation: slideUpFade 0.8s ease-out 0.4s forwards;
+  animation: slideUpFade 0.7s ease-out 0.5s both;
 }

@@ -9,7 +9,7 @@ interface SlideshowViewProps {
 export const SlideshowView: React.FC<SlideshowViewProps> = ({ onExit }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
-  const TRANSITION_DURATION = 500;
+  const TRANSITION_DURATION = 300;
 
   const activeSlides = SLIDES;
 
@@ -65,23 +65,27 @@ export const SlideshowView: React.FC<SlideshowViewProps> = ({ onExit }) => {
   return (
     <div className="w-full h-full relative group bg-black">
       <Slide content={activeSlides[currentIndex]} isExiting={isExiting} onNext={goToNext} />
+
+      {/* Navigation — visible on hover */}
       <div className="fixed bottom-8 right-8 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
         <button
           onClick={goToPrev}
           disabled={currentIndex === 0 || isExiting}
-          className="p-3 bg-gray-800/50 rounded-full text-white disabled:opacity-30 hover:bg-gray-700 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full text-white text-xs font-bold uppercase tracking-wider disabled:opacity-25 hover:bg-white/20 transition-colors"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
           </svg>
+          Prev
         </button>
         <button
           onClick={goToNext}
           disabled={currentIndex === activeSlides.length - 1 || isExiting}
-          className="p-3 bg-gray-800/50 rounded-full text-white disabled:opacity-30 hover:bg-gray-700 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full text-white text-xs font-bold uppercase tracking-wider disabled:opacity-25 hover:bg-white/20 transition-colors"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          Next
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>

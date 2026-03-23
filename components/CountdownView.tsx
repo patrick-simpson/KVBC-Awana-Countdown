@@ -1,54 +1,48 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BrandBar } from './BrandBar';
 
 interface CountdownViewProps {
   onComplete: () => void;
   targetDate: Date;
   title?: string;
-  bgColorClass?: string;
-  accentColorClass?: string;
+  clubColor?: string;
 }
 
-const PARTICLE_COLORS = ['bg-red-600', 'bg-blue-600', 'bg-green-600', 'bg-yellow-500'];
+const ORBS = [
+  { color: '#E8192C', size: '55vw', top: '-18%', left: '-14%', duration: 28, delay: 0,   opacity: 0.07 },
+  { color: '#FFC107', size: '38vw', top: '-12%', left: '68%',  duration: 36, delay: -13, opacity: 0.06 },
+  { color: '#0072CE', size: '44vw', top: '62%',  left: '-10%', duration: 24, delay: -8,  opacity: 0.07 },
+  { color: '#00A651', size: '34vw', top: '58%',  left: '70%',  duration: 32, delay: -19, opacity: 0.06 },
+  { color: '#FFC107', size: '24vw', top: '38%',  left: '40%',  duration: 42, delay: -24, opacity: 0.04 },
+  { color: '#E8192C', size: '20vw', top: '22%',  left: '18%',  duration: 27, delay: -6,  opacity: 0.04 },
+];
 
-export const CountdownView: React.FC<CountdownViewProps> = ({ 
-  onComplete, 
-  targetDate, 
-  title = 'Club Starts In',
-  bgColorClass = 'bg-black',
-  accentColorClass = 'text-white'
+const LOGO_SRC = `${import.meta.env.BASE_URL}awana-logo.png`;
+
+export const CountdownView: React.FC<CountdownViewProps> = ({
+  onComplete,
+  targetDate,
+  title,
+  clubColor,
 }) => {
   const [timeLeft, setTimeLeft] = useState(0);
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 30 }, (_, i) => ({
-        id: i,
-        left: `${Math.random() * 100}%`,
-        size: `${Math.random() * 3 + 1}rem`,
-        color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
-        duration: `${Math.random() * 10 + 10}s`,
-        delay: `-${Math.random() * 20}s`,
-      })),
-    []
-  );
+  const isGameTime = !!clubColor;
 
   useEffect(() => {
-    const calculateTimeLeft = () => {
-      const distance = targetDate.getTime() - new Date().getTime();
-      if (distance <= 0) {
-        onComplete();
-        return 0;
-      }
+    const calc = () => {
+      const distance = targetDate.getTime() - Date.now();
+      if (distance <= 0) { onComplete(); return 0; }
       return Math.floor(distance / 1000);
     };
-    setTimeLeft(calculateTimeLeft());
-    const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
+    setTimeLeft(calc());
+    const timer = setInterval(() => setTimeLeft(calc()), 1000);
     return () => clearInterval(timer);
   }, [targetDate, onComplete]);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (['Space', 'ArrowRight', 'PageDown'].includes(event.code)) {
-        event.preventDefault();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['Space', 'ArrowRight', 'PageDown'].includes(e.code)) {
+        e.preventDefault();
         onComplete();
       }
     };
@@ -56,55 +50,104 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onComplete]);
 
-  const days = Math.floor(timeLeft / 86400);
-  const hours = Math.floor((timeLeft % 86400) / 3600);
+  const days    = Math.floor(timeLeft / 86400);
+  const hours   = Math.floor((timeLeft % 86400) / 3600);
   const minutes = Math.floor((timeLeft % 3600) / 60);
   const seconds = timeLeft % 60;
-  
-  let formattedTime = days > 0 
-    ? `${days}d ${hours}h ${minutes}m` 
-    : hours > 0 
-      ? `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` 
-      : `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+  const formattedTime = days > 0
+    ? `${days}d ${hours}h ${minutes}m`
+    : `${hours > 0 ? hours + ':' : ''}${minutes.toString().padStart(hours > 0 ? 2 : 1, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+  const timerFontSize = days > 0 ? '10vw' : '22vw';
+  const isUrgent     = timeLeft > 0 && timeLeft < 60;
+  const timerColor   = isUrgent ? '#E8192C' : (clubColor ?? '#FFFFFF');
+  const timerGlow    = isUrgent
+    ? 'drop-shadow(0 0 50px rgba(232,25,44,0.75))'
+    : clubColor
+      ? `drop-shadow(0 0 45px ${clubColor}65)`
+      : undefined;
+
+  const labelText  = isGameTime ? (title ?? 'Game Time').toUpperCase() : 'AWANA NIGHT';
+  const labelColor = isGameTime ? timerColor : '#FFC107';
+  const endTimeStr = targetDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
 
   return (
-    <div className={`w-full h-full flex flex-col items-center justify-center ${bgColorClass} relative overflow-hidden animate-fade-in`}>
-      <div className="absolute inset-0 pointer-events-none">
-        {particles.map((p) => (
-          <div
-            key={p.id}
-            className={`rounded-full animate-float ${p.color} blur-sm absolute`}
-            style={{
-              left: p.left,
-              width: p.size,
-              height: p.size,
-              animationDuration: p.duration,
-              animationDelay: p.delay,
-            }}
-          />
-        ))}
-      </div>
-      <div className="z-10 w-full h-full flex flex-col items-center justify-center">
-        <h2 className="text-4xl text-gray-400 font-bold mb-8 uppercase tracking-widest">{title}</h2>
+    <div className="w-full h-full bg-black flex flex-col relative overflow-hidden">
+
+      {/* Ambient orbs */}
+      {ORBS.map((orb, i) => (
         <div
-          className="relative w-full flex justify-center items-center cursor-pointer group"
+          key={i}
+          className="absolute rounded-full pointer-events-none animate-orbit"
+          style={{
+            backgroundColor: orb.color,
+            width:  orb.size,
+            height: orb.size,
+            top:    orb.top,
+            left:   orb.left,
+            filter: 'blur(90px)',
+            opacity: orb.opacity,
+            animationDuration: `${orb.duration}s`,
+            animationDelay:    `${orb.delay}s`,
+          }}
+        />
+      ))}
+
+      {/* Top brand bar */}
+      <BrandBar />
+
+      {/* Content */}
+      <div className="flex-1 flex flex-col items-center justify-center relative z-10 px-8">
+
+        {/* Logo watermark — top left */}
+        <div className="absolute top-6 left-8">
+          <div className="bg-white rounded-2xl px-4 py-2 shadow-xl">
+            <img
+              src={LOGO_SRC}
+              alt="Awana"
+              className="h-12 w-auto"
+              onError={(e) => { (e.target as HTMLElement).parentElement!.style.display = 'none'; }}
+            />
+          </div>
+        </div>
+
+        {/* Label */}
+        <p
+          className="text-xs font-black uppercase tracking-[0.4em] mb-4 select-none"
+          style={{ color: labelColor }}
+        >
+          {labelText}
+        </p>
+
+        {/* Timer */}
+        <div
+          className="cursor-pointer group relative"
           onClick={onComplete}
-          title="Click to skip timer"
+          title="Click to skip"
         >
           <h1
-            className={`${
-              days > 0 ? 'text-[12vw]' : 'text-[25vw]'
-            } leading-none font-bold tabular-nums drop-shadow-2xl transition-colors duration-500 ${
-              timeLeft < 60 && timeLeft > 0 ? 'text-red-500' : accentColorClass
-            } group-hover:text-gray-200`}
+            className="font-mono font-black tabular-nums leading-none transition-colors duration-500 select-none"
+            style={{ fontSize: timerFontSize, color: timerColor, filter: timerGlow }}
           >
             {formattedTime}
           </h1>
-          <div className="absolute bottom-0 opacity-0 group-hover:opacity-100 text-sm text-gray-500 font-semibold uppercase tracking-widest transition-opacity">
-            Click to Skip
-          </div>
+          <span className="absolute -bottom-6 right-0 text-[11px] text-slate-600 font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            Click to skip →
+          </span>
         </div>
+
+        {/* Subtitle */}
+        <p className="text-slate-500 text-lg mt-10 tracking-wide select-none">
+          {isGameTime
+            ? `Game ends at ${endTimeStr}`
+            : 'Next meeting · Wednesday · 6:00 PM'}
+        </p>
+
       </div>
+
+      {/* Bottom brand bar */}
+      <BrandBar />
     </div>
   );
 };
