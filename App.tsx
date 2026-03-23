@@ -141,12 +141,15 @@ export const App: React.FC = () => {
       )}
 
       {mode === AppMode.SHUTDOWN && (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-black">
-          <p className="text-xs font-black uppercase tracking-[0.4em] text-[#FFC107] mb-6">Awana Night</p>
-          <h1 className="text-7xl font-black text-white text-center leading-tight mb-4">
+        <div className="w-full h-full flex flex-col items-center justify-center" style={{ background: '#04050f' }}>
+          <p className="text-xs font-black uppercase tracking-[0.4em] mb-6 text-shimmer">Awana Night</p>
+          <h1
+            className="text-7xl font-black text-white text-center leading-tight mb-4 animate-pop-in"
+            style={{ textShadow: '0 0 40px rgba(255,255,255,0.4), 0 0 100px rgba(255,255,255,0.15)' }}
+          >
             See you next week!
           </h1>
-          <p className="text-slate-600 text-lg tracking-wide">Have a safe drive home.</p>
+          <p className="text-slate-500 text-lg tracking-wide animate-slide-up-fade">Have a safe drive home.</p>
         </div>
       )}
     </div>

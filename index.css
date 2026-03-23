@@ -28,6 +28,29 @@
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+  @keyframes particleFloat {
+    0%   { transform: translateY(0);       opacity: 0; }
+    8%   { opacity: 1; }
+    88%  { opacity: 0.9; }
+    100% { transform: translateY(-110vh);  opacity: 0; }
+  }
+  @keyframes tickPulse {
+    0%   { transform: scale(1); }
+    20%  { transform: scale(1.022); }
+    100% { transform: scale(1); }
+  }
+  @keyframes pulseRing {
+    0%   { transform: scale(0.75); opacity: 0.85; }
+    100% { transform: scale(2.6);  opacity: 0; }
+  }
+  @keyframes shimmerText {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.04); }
+  }
 }
 
 @layer base {
@@ -65,4 +88,29 @@
 
 .animate-slide-up-fade {
   animation: slideUpFade 0.7s ease-out 0.5s both;
+}
+
+.animate-particle-float {
+  animation: particleFloat linear infinite;
+}
+
+.animate-tick-pulse {
+  animation: tickPulse 0.45s ease-out both;
+}
+
+.animate-pulse-ring {
+  animation: pulseRing 1.4s ease-out infinite;
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.text-shimmer {
+  background: linear-gradient(90deg, #FFC107 0%, #fff 40%, #FFC107 60%, #fff 80%, #FFC107 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerText 4s linear infinite;
 }
