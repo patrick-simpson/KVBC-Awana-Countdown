@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrandBar } from './BrandBar';
+import { ParticleField } from './ParticleField';
 
 interface CountdownViewProps {
   onComplete: () => void;
@@ -9,12 +10,14 @@ interface CountdownViewProps {
 }
 
 const ORBS = [
-  { color: '#E8192C', size: '55vw', top: '-18%', left: '-14%', duration: 28, delay: 0,   opacity: 0.07 },
-  { color: '#FFC107', size: '38vw', top: '-12%', left: '68%',  duration: 36, delay: -13, opacity: 0.06 },
-  { color: '#0072CE', size: '44vw', top: '62%',  left: '-10%', duration: 24, delay: -8,  opacity: 0.07 },
-  { color: '#00A651', size: '34vw', top: '58%',  left: '70%',  duration: 32, delay: -19, opacity: 0.06 },
-  { color: '#FFC107', size: '24vw', top: '38%',  left: '40%',  duration: 42, delay: -24, opacity: 0.04 },
-  { color: '#E8192C', size: '20vw', top: '22%',  left: '18%',  duration: 27, delay: -6,  opacity: 0.04 },
+  { color: '#E8192C', size: '70vw', top: '-22%', left: '-18%', duration: 28, delay: 0,   opacity: 0.25 },
+  { color: '#FFC107', size: '48vw', top: '-16%', left: '64%',  duration: 36, delay: -13, opacity: 0.20 },
+  { color: '#0072CE', size: '60vw', top: '58%',  left: '-14%', duration: 24, delay: -8,  opacity: 0.22 },
+  { color: '#00A651', size: '44vw', top: '54%',  left: '66%',  duration: 32, delay: -19, opacity: 0.18 },
+  { color: '#FFC107', size: '32vw', top: '34%',  left: '36%',  duration: 42, delay: -24, opacity: 0.12 },
+  { color: '#E8192C', size: '24vw', top: '18%',  left: '14%',  duration: 27, delay: -6,  opacity: 0.11 },
+  { color: '#0072CE', size: '22vw', top: '43%',  left: '53%',  duration: 33, delay: -15, opacity: 0.10 },
+  { color: '#00A651', size: '18vw', top: '10%',  left: '78%',  duration: 45, delay: -30, opacity: 0.09 },
 ];
 
 const LOGO_SRC = `${import.meta.env.BASE_URL}awana-logo.png`;
@@ -26,6 +29,7 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
   clubColor,
 }) => {
   const [timeLeft, setTimeLeft] = useState(0);
+  const [tickKey, setTickKey] = useState(0);
   const isGameTime = !!clubColor;
 
   useEffect(() => {
@@ -35,7 +39,11 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
       return Math.floor(distance / 1000);
     };
     setTimeLeft(calc());
-    const timer = setInterval(() => setTimeLeft(calc()), 1000);
+    const timer = setInterval(() => {
+      const next = calc();
+      setTimeLeft(next);
+      setTickKey(k => k + 1);
+    }, 1000);
     return () => clearInterval(timer);
   }, [targetDate, onComplete]);
 
@@ -61,22 +69,32 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
 
   const timerFontSize = days > 0 ? '10vw' : '22vw';
   const isUrgent     = timeLeft > 0 && timeLeft < 60;
-  const timerColor   = isUrgent ? '#E8192C' : (clubColor ?? '#FFFFFF');
-  const timerGlow    = isUrgent
-    ? 'drop-shadow(0 0 50px rgba(232,25,44,0.75))'
+
+  const timerColor = isUrgent ? '#E8192C' : (clubColor ?? '#FFFFFF');
+
+  // Neon text-shadow glow — much more dramatic than filter: drop-shadow
+  const timerTextShadow = isUrgent
+    ? '0 0 20px rgba(232,25,44,1), 0 0 50px rgba(232,25,44,0.8), 0 0 120px rgba(232,25,44,0.5), 0 0 200px rgba(232,25,44,0.3)'
     : clubColor
-      ? `drop-shadow(0 0 45px ${clubColor}65)`
-      : undefined;
+      ? `0 0 20px ${clubColor}FF, 0 0 50px ${clubColor}CC, 0 0 100px ${clubColor}66`
+      : '0 0 18px rgba(255,255,255,0.5), 0 0 60px rgba(255,255,255,0.18), 0 0 120px rgba(255,255,255,0.08)';
 
   const labelText  = isGameTime ? (title ?? 'Game Time').toUpperCase() : 'AWANA NIGHT';
   const labelColor = isGameTime ? timerColor : '#FFC107';
   const endTimeStr = targetDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
 
-  return (
-    <div className="w-full h-full bg-black flex flex-col relative overflow-hidden">
+  // Active orb color for game time (tints the orbs to club color)
+  const activeOrbs = isGameTime && clubColor
+    ? ORBS.map((o, i) => i % 2 === 0 ? { ...o, color: clubColor } : o)
+    : ORBS;
 
+  return (
+    <div
+      className="w-full h-full flex flex-col relative overflow-hidden"
+      style={{ background: '#04050f' }}
+    >
       {/* Ambient orbs */}
-      {ORBS.map((orb, i) => (
+      {activeOrbs.map((orb, i) => (
         <div
           key={i}
           className="absolute rounded-full pointer-events-none animate-orbit"
@@ -86,7 +104,7 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
             height: orb.size,
             top:    orb.top,
             left:   orb.left,
-            filter: 'blur(90px)',
+            filter: 'blur(80px)',
             opacity: orb.opacity,
             animationDuration: `${orb.duration}s`,
             animationDelay:    `${orb.delay}s`,
@@ -94,8 +112,27 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
         />
       ))}
 
+      {/* Floating particles */}
+      <ParticleField />
+
+      {/* Scanline overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none z-[2]"
+        style={{
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.035) 3px, rgba(0,0,0,0.035) 4px)',
+        }}
+      />
+
+      {/* Vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none z-[2]"
+        style={{
+          background: 'radial-gradient(ellipse at 50% 50%, transparent 25%, rgba(0,0,0,0.55) 100%)',
+        }}
+      />
+
       {/* Top brand bar */}
-      <BrandBar />
+      <BrandBar height={6} />
 
       {/* Content */}
       <div className="flex-1 flex flex-col items-center justify-center relative z-10 px-8">
@@ -112,33 +149,56 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
           </div>
         </div>
 
-        {/* Label */}
-        <p
-          className="text-xs font-black uppercase tracking-[0.4em] mb-4 select-none"
-          style={{ color: labelColor }}
-        >
-          {labelText}
-        </p>
+        {/* Label — shimmer for main countdown, solid for game time */}
+        {isGameTime ? (
+          <p
+            className="text-sm font-black uppercase tracking-[0.4em] mb-4 select-none animate-breathe"
+            style={{ color: labelColor, textShadow: `0 0 20px ${labelColor}99` }}
+          >
+            {labelText}
+          </p>
+        ) : (
+          <p className="text-sm font-black uppercase tracking-[0.4em] mb-4 select-none text-shimmer">
+            {labelText}
+          </p>
+        )}
 
-        {/* Timer */}
-        <div
-          className="cursor-pointer group relative"
-          onClick={onComplete}
-          title="Click to skip"
-        >
+        {/* Timer with urgency rings */}
+        <div className="cursor-pointer group relative flex items-center justify-center" onClick={onComplete} title="Click to skip">
+
+          {/* Pulsing rings when urgent */}
+          {isUrgent && (
+            <>
+              <div
+                className="absolute rounded-full animate-pulse-ring pointer-events-none border border-[#E8192C]"
+                style={{ width: '60vw', height: '60vw', opacity: 0.4 }}
+              />
+              <div
+                className="absolute rounded-full animate-pulse-ring pointer-events-none border border-[#E8192C]"
+                style={{ width: '60vw', height: '60vw', opacity: 0.4, animationDelay: '-0.7s' }}
+              />
+            </>
+          )}
+
           <h1
-            className="font-mono font-black tabular-nums leading-none transition-colors duration-500 select-none"
-            style={{ fontSize: timerFontSize, color: timerColor, filter: timerGlow }}
+            key={tickKey}
+            className="font-mono font-black tabular-nums leading-none select-none animate-tick-pulse"
+            style={{
+              fontSize: timerFontSize,
+              color: timerColor,
+              textShadow: timerTextShadow,
+            }}
           >
             {formattedTime}
           </h1>
+
           <span className="absolute -bottom-6 right-0 text-[11px] text-slate-600 font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             Click to skip →
           </span>
         </div>
 
         {/* Subtitle */}
-        <p className="text-slate-500 text-lg mt-10 tracking-wide select-none">
+        <p className="text-slate-500 text-lg mt-12 tracking-wide select-none">
           {isGameTime
             ? `Game ends at ${endTimeStr}`
             : 'Next meeting · Wednesday · 6:00 PM'}
@@ -147,7 +207,7 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
       </div>
 
       {/* Bottom brand bar */}
-      <BrandBar />
+      <BrandBar height={6} />
     </div>
   );
 };
