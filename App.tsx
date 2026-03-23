@@ -128,12 +128,11 @@ export const App: React.FC = () => {
       )}
       
       {mode === AppMode.GAME_TIME && activeScheduleItem && (
-        <CountdownView 
-          targetDate={gameTimeTarget} 
-          onComplete={() => {}} 
+        <CountdownView
+          targetDate={gameTimeTarget}
+          onComplete={() => {}}
           title={activeScheduleItem.title}
-          bgColorClass={activeScheduleItem.bgColorClass}
-          accentColorClass={activeScheduleItem.accentColorClass}
+          clubColor={activeScheduleItem.clubColor}
         />
       )}
 
@@ -142,12 +141,12 @@ export const App: React.FC = () => {
       )}
 
       {mode === AppMode.SHUTDOWN && (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 text-red-600 animate-pulse">
-          <h1 className="text-6xl font-black uppercase tracking-tighter mb-4">System Shutdown</h1>
-          <p className="text-xl font-mono opacity-70">Initiating power down sequence...</p>
-          <div className="mt-12 w-64 h-2 bg-zinc-900 rounded-full overflow-hidden">
-            <div className="h-full bg-red-600 animate-[shimmer_2s_infinite]" style={{ width: '100%' }}></div>
-          </div>
+        <div className="w-full h-full flex flex-col items-center justify-center bg-black">
+          <p className="text-xs font-black uppercase tracking-[0.4em] text-[#FFC107] mb-6">Awana Night</p>
+          <h1 className="text-7xl font-black text-white text-center leading-tight mb-4">
+            See you next week!
+          </h1>
+          <p className="text-slate-600 text-lg tracking-wide">Have a safe drive home.</p>
         </div>
       )}
     </div>

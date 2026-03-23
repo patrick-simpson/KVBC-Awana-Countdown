@@ -24,5 +24,6 @@ export interface ScheduleItem {
   title: string;
   bgColorClass: string;
   accentColorClass: string;
+  clubColor?: string;
   mode: AppMode;
 }
