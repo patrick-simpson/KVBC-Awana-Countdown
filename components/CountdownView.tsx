@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrandBar } from './BrandBar';
 import { ParticleField } from './ParticleField';
+import { WeatherScene } from './WeatherScene';
+import { EventsStrip } from './EventsStrip';
+import { useWeather } from '../hooks/useWeather';
+import { useCalendarEvents } from '../hooks/useCalendarEvents';
 
 interface CountdownViewProps {
   onComplete: () => void;
@@ -31,6 +35,8 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
   const [timeLeft, setTimeLeft] = useState(0);
   const [tickKey, setTickKey] = useState(0);
   const isGameTime = !!clubColor;
+  const weather = useWeather();
+  const events = useCalendarEvents();
 
   useEffect(() => {
     const calc = () => {
@@ -79,7 +85,7 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
       ? `0 0 20px ${clubColor}FF, 0 0 50px ${clubColor}CC, 0 0 100px ${clubColor}66`
       : '0 0 18px rgba(255,255,255,0.5), 0 0 60px rgba(255,255,255,0.18), 0 0 120px rgba(255,255,255,0.08)';
 
-  const labelText  = isGameTime ? (title ?? 'Game Time').toUpperCase() : 'AWANA NIGHT';
+  const labelText  = isGameTime ? (title ?? 'Game Time').toUpperCase() : 'AWANA BEGINS IN';
   const labelColor = isGameTime ? timerColor : '#FFC107';
   const endTimeStr = targetDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
 
@@ -93,6 +99,9 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
       className="w-full h-full flex flex-col relative overflow-hidden"
       style={{ background: '#04050f' }}
     >
+      {/* Weather scene overlay */}
+      <WeatherScene weather={weather} />
+
       {/* Ambient orbs */}
       {activeOrbs.map((orb, i) => (
         <div
@@ -203,6 +212,9 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
             ? `Game ends at ${endTimeStr}`
             : 'Next meeting · Wednesday · 6:00 PM'}
         </p>
+
+        {/* Upcoming events strip */}
+        {!isGameTime && <EventsStrip events={events} />}
 
       </div>
 
