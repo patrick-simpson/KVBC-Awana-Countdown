@@ -51,6 +51,41 @@
     0%, 100% { opacity: 0.7; transform: scale(1); }
     50%       { opacity: 1;   transform: scale(1.04); }
   }
+  @keyframes rainFall {
+    0%   { transform: translateY(-100vh) rotate(20deg); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(100vh) rotate(20deg); opacity: 0; }
+  }
+  @keyframes snowFall {
+    0%   { transform: translateY(-100vh) translateX(0); opacity: 0; }
+    5%   { opacity: 0.8; }
+    95%  { opacity: 0.4; }
+    100% { transform: translateY(100vh) translateX(50px); opacity: 0; }
+  }
+  @keyframes thunderFlash {
+    0%, 10%, 100% { opacity: 0; }
+    5%, 8% { opacity: 0.15; }
+  }
+  @keyframes sunRay {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @keyframes cloudDrift {
+    0%   { transform: translateX(-150px); }
+    50%  { transform: translateX(150px); }
+    100% { transform: translateX(-150px); }
+  }
+  @keyframes birdFly {
+    0%   { transform: translateX(-100px) translateY(0); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateX(100vw) translateY(-50px); opacity: 0; }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 }
 
 @layer base {
