@@ -4,6 +4,7 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
+  /* ── Existing animations ── */
   @keyframes gradientShift {
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -86,6 +87,140 @@
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* ── Flip digit ── */
+  @keyframes digitRollOut {
+    0%   { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-100%); opacity: 0; }
+  }
+  @keyframes digitRollIn {
+    0%   { transform: translateY(80%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  /* ── Confetti burst ── */
+  @keyframes confettiExplode {
+    0%   { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
+    12%  { transform: translate(calc(-50% + var(--cx) * 0.5), calc(-50% + var(--cy) * 0.5)) scale(1) rotate(calc(var(--cr) * 0.3)); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--cx)), calc(-50% + var(--cy) + 50vh)) scale(0.3) rotate(var(--cr)); opacity: 0; }
+  }
+
+  /* ── Starfield ── */
+  @keyframes twinkle {
+    0%, 100% { opacity: var(--star-min, 0.15); }
+    50%      { opacity: var(--star-max, 0.7); }
+  }
+  @keyframes shootingStar {
+    0%   { transform: translateX(0) translateY(0) scaleX(0); opacity: 0; }
+    3%   { opacity: 1; transform: translateX(0) translateY(0) scaleX(1); }
+    100% { transform: translateX(var(--shoot-x, 250px)) translateY(var(--shoot-y, 150px)) scaleX(1); opacity: 0; }
+  }
+
+  /* ── Aurora color wave ── */
+  @keyframes auroraWave {
+    0%   { transform: translateX(-30%) skewX(-5deg) scaleY(1); }
+    33%  { transform: translateX(10%) skewX(3deg) scaleY(1.3); }
+    66%  { transform: translateX(-10%) skewX(-3deg) scaleY(0.7); }
+    100% { transform: translateX(-30%) skewX(-5deg) scaleY(1); }
+  }
+
+  /* ── Seasonal overlays ── */
+  @keyframes leafFall {
+    0%   { transform: translateY(-10vh) rotate(0deg) translateX(0); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.2; }
+    100% { transform: translateY(110vh) rotate(360deg) translateX(80px); opacity: 0; }
+  }
+  @keyframes fireflyGlow {
+    0%, 100% { opacity: 0; }
+    20%  { opacity: 0; }
+    35%  { opacity: 0.8; }
+    50%  { opacity: 0.5; }
+    65%  { opacity: 0.9; }
+    80%  { opacity: 0; }
+  }
+  @keyframes fireflyDrift {
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(var(--fly-x1, 30px), var(--fly-y1, -20px)); }
+    50%  { transform: translate(var(--fly-x2, -15px), var(--fly-y2, 15px)); }
+    75%  { transform: translate(var(--fly-x3, 25px), var(--fly-y3, -25px)); }
+    100% { transform: translate(0, 0); }
+  }
+  @keyframes blossomFall {
+    0%   { transform: translateY(-10vh) rotate(0deg) translateX(0); opacity: 0; }
+    10%  { opacity: 0.5; }
+    50%  { transform: translateY(50vh) rotate(180deg) translateX(-40px); opacity: 0.35; }
+    100% { transform: translateY(110vh) rotate(360deg) translateX(20px); opacity: 0; }
+  }
+
+  /* ── Colon pulse ── */
+  @keyframes colonPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.25; }
+  }
+
+  /* ── Milestone callout ── */
+  @keyframes milestoneEnter {
+    0%   { transform: scale(0.3) translateY(20px); opacity: 0; filter: blur(10px); }
+    60%  { transform: scale(1.08) translateY(-4px); opacity: 1; filter: blur(0); }
+    100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+  }
+  @keyframes milestoneExit {
+    0%   { transform: scale(1); opacity: 1; filter: blur(0); }
+    100% { transform: scale(1.4) translateY(-30px); opacity: 0; filter: blur(8px); }
+  }
+
+  /* ── Screen shake (urgency) ── */
+  @keyframes screenShake {
+    0%, 100% { transform: translate(0, 0); }
+    10%  { transform: translate(-1px, 1px); }
+    20%  { transform: translate(1px, -1px); }
+    30%  { transform: translate(-1px, 0); }
+    40%  { transform: translate(1px, 1px); }
+    50%  { transform: translate(-1px, -1px); }
+    60%  { transform: translate(1px, 0); }
+    70%  { transform: translate(0, 1px); }
+    80%  { transform: translate(-1px, -1px); }
+    90%  { transform: translate(1px, 1px); }
+  }
+
+  /* ── Gradient text ── */
+  @keyframes gradientTextShift {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  /* ── Logo glow ── */
+  @keyframes logoGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(232,25,44,0.4), 0 0 40px rgba(232,25,44,0.1); }
+    25%  { box-shadow: 0 0 20px rgba(255,193,7,0.4), 0 0 40px rgba(255,193,7,0.1); }
+    50%  { box-shadow: 0 0 20px rgba(0,114,206,0.4), 0 0 40px rgba(0,114,206,0.1); }
+    75%  { box-shadow: 0 0 20px rgba(0,166,81,0.4), 0 0 40px rgba(0,166,81,0.1); }
+  }
+
+  /* ── 3D slide transitions ── */
+  @keyframes slideFlipOutLeft {
+    0%   { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
+    100% { transform: perspective(1200px) rotateY(-90deg); opacity: 0; }
+  }
+  @keyframes slideFlipOutRight {
+    0%   { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
+    100% { transform: perspective(1200px) rotateY(90deg); opacity: 0; }
+  }
+  @keyframes slideFlipInRight {
+    0%   { transform: perspective(1200px) rotateY(90deg); opacity: 0; }
+    100% { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
+  }
+  @keyframes slideFlipInLeft {
+    0%   { transform: perspective(1200px) rotateY(-90deg); opacity: 0; }
+    100% { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
+  }
+
+  /* ── Scoreboard frame pulse ── */
+  @keyframes scoreboardPulse {
+    0%, 100% { opacity: 0.6; }
+    50%      { opacity: 1; }
+  }
 }
 
 @layer base {
@@ -102,45 +237,50 @@
   }
 }
 
-/* 4-color Awana brand gradient bar */
+/* ── Brand bar gradient ── */
 .brand-bar-animated {
   background: linear-gradient(90deg, #E8192C, #FFC107, #0072CE, #00A651, #E8192C);
   background-size: 300% 100%;
   animation: gradientShift 12s ease infinite;
 }
 
+/* ── Orbit ── */
 .animate-orbit {
   animation: orbitDrift ease-in-out infinite;
 }
 
+/* ── Entrance animations ── */
 .animate-fade-up {
   animation: fadeUp 0.5s ease-out forwards;
 }
-
 .animate-pop-in {
   animation: popIn 0.9s cubic-bezier(0.26, 0.53, 0.74, 1.48) forwards;
 }
-
 .animate-slide-up-fade {
   animation: slideUpFade 0.7s ease-out 0.5s both;
 }
 
+/* ── Particle float ── */
 .animate-particle-float {
   animation: particleFloat linear infinite;
 }
 
+/* ── Timer tick ── */
 .animate-tick-pulse {
   animation: tickPulse 0.45s ease-out both;
 }
 
+/* ── Urgency pulse ring ── */
 .animate-pulse-ring {
   animation: pulseRing 1.4s ease-out infinite;
 }
 
+/* ── Breathing animation ── */
 .animate-breathe {
   animation: breathe 3s ease-in-out infinite;
 }
 
+/* ── Shimmer text ── */
 .text-shimmer {
   background: linear-gradient(90deg, #FFC107 0%, #fff 40%, #FFC107 60%, #fff 80%, #FFC107 100%);
   background-size: 200% auto;
@@ -148,4 +288,51 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: shimmerText 4s linear infinite;
+}
+
+/* ── Flip digit ── */
+.flip-digit {
+  display: inline-flex;
+  position: relative;
+  overflow: hidden;
+  height: 1.15em;
+  line-height: 1.15em;
+  vertical-align: bottom;
+  justify-content: center;
+}
+.flip-digit-out {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: digitRollOut 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.flip-digit-in {
+  animation: digitRollIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ── Gradient text ── */
+.gradient-text-animated {
+  background: linear-gradient(90deg, #E8192C, #FFC107, #0072CE, #00A651, #E8192C);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientTextShift 6s linear infinite;
+}
+
+/* ── Logo glow ── */
+.animate-logo-glow {
+  animation: logoGlow 8s ease-in-out infinite;
+}
+
+/* ── Screen shake ── */
+.animate-screen-shake {
+  animation: screenShake 0.3s ease-in-out infinite;
+}
+
+/* ── Scoreboard frame ── */
+.animate-scoreboard-pulse {
+  animation: scoreboardPulse 3s ease-in-out infinite;
 }

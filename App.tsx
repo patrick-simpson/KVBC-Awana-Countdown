@@ -100,7 +100,7 @@ export const App: React.FC = () => {
     <div className="w-full h-full relative group">
       {/* Hidden Quick Nav - visible on hover in a corner */}
       <div className="absolute top-4 right-4 z-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2 items-end">
-        <div className="bg-black/80 backdrop-blur-md border border-white/10 p-2 rounded-xl flex flex-col gap-1 shadow-2xl">
+        <div className="bg-black/50 backdrop-blur-xl border border-white/10 p-2 rounded-xl flex flex-col gap-1" style={{ boxShadow: '0 0 30px rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.8)' }}>
           <button 
             onClick={() => handleManualSelect('COUNTDOWN')}
             className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all text-right"
@@ -168,7 +168,7 @@ const ShutdownScreen: React.FC<{ onRestart: () => void }> = ({ onRestart }) => {
   return (
     <div
       className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
-      style={{ background: '#04050f' }}
+      style={{ background: '#000000' }}
       onClick={onRestart}
     >
       <p className="text-xs font-black uppercase tracking-[0.4em] mb-6 text-shimmer">Awana Night</p>
@@ -200,7 +200,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center h-screen w-screen bg-gray-900 text-white p-8">
+        <div className="flex flex-col items-center justify-center h-screen w-screen bg-black text-white p-8">
           <h1 className="text-3xl font-bold text-red-500 mb-4">Something went wrong.</h1>
           <div className="bg-black p-4 rounded border border-gray-700 max-w-2xl overflow-auto">
             <p className="font-mono text-sm text-red-300">{this.state.error?.toString()}</p>
