@@ -97,7 +97,7 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
   return (
     <div
       className="w-full h-full flex flex-col relative overflow-hidden"
-      style={{ background: '#04050f' }}
+      style={{ background: '#000000' }}
     >
       {/* Weather scene overlay */}
       <WeatherScene weather={weather} />

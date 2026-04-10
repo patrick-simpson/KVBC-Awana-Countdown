@@ -156,6 +156,16 @@ There are no `.env` files. Configuration is hardcoded in source:
 - **Calendar URL:** `useCalendarEvents.ts`
 - **Awana brand colors:** Red `#E8192C`, Blue `#0072CE`, Green `#00A651`, Yellow `#FFC107`
 
+## Design Rules
+
+These rules are mandatory. Every change must satisfy all three:
+
+1. **Broadcast-ready quality.** Every screen must look polished enough for live broadcast. Use smooth transitions between views, animated visual effects, and professional typography. No raw/unstyled elements, no layout jank, no abrupt state changes. New UI must match the existing production quality (neon glows, particle effects, animated orbs, brand gradients).
+
+2. **Pure black backgrounds.** The app is projected onto a blank wall. All backgrounds must be `#000000` (true black) so the projected image appears borderless. Never use gray, dark navy, or off-black — any non-black color is visible on the wall.
+
+3. **Never revert functionality.** Changes must be additive. Do not remove, disable, or regress existing features, animations, keyboard shortcuts, or visual effects — even when refactoring or fixing bugs. If a feature needs to change, replace it with something equal or better.
+
 ## Important Notes for AI Assistants
 
 - The `docs/` directory contains a pre-built copy for GitHub Pages — do not edit these files directly; they are build artifacts.
