@@ -31,11 +31,7 @@ export const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext
     hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
   });
 
-  const contentTransition = `transition-all duration-400 ease-in-out ${
-    isExiting
-      ? 'opacity-0 scale-95 blur-sm translate-y-2'
-      : 'opacity-100 scale-100 blur-0 translate-y-0'
-  }`;
+  const contentTransition = 'transition-all duration-400 ease-in-out opacity-100 scale-100 blur-0 translate-y-0';
 
   return (
     <div
@@ -77,7 +73,7 @@ export const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext
 
       {/* Header row */}
       <div className="flex items-center justify-between px-10 py-5 flex-shrink-0 relative z-10">
-        <div className="bg-white rounded-xl px-4 py-2 shadow-lg">
+        <div className="bg-white rounded-xl px-4 py-2 shadow-lg animate-logo-glow">
           <img
             src={LOGO_SRC}
             alt="Awana"
@@ -110,16 +106,28 @@ export const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext
             <p className="text-xs font-black uppercase tracking-[0.45em] mb-6 text-shimmer animate-fade-up">
               {content.title}
             </p>
-            <h1
-              className="font-black leading-none animate-pop-in text-center"
-              style={{
-                fontSize: '14vw',
-                color: '#ffffff',
-                textShadow: '0 0 40px rgba(255,255,255,0.6), 0 0 100px rgba(255,255,255,0.25)',
-              }}
-            >
-              WELCOME!
-            </h1>
+            <div className="relative">
+              {/* Glow layer behind gradient text */}
+              <h1
+                className="font-black leading-none text-center absolute inset-0"
+                style={{
+                  fontSize: '14vw',
+                  color: '#ffffff',
+                  filter: 'blur(35px)',
+                  opacity: 0.45,
+                }}
+                aria-hidden="true"
+              >
+                WELCOME!
+              </h1>
+              {/* Gradient text */}
+              <h1
+                className="font-black leading-none animate-pop-in text-center gradient-text-animated relative"
+                style={{ fontSize: '14vw' }}
+              >
+                WELCOME!
+              </h1>
+            </div>
             <p
               className="text-slate-300 text-3xl mt-8 animate-slide-up-fade"
               style={{ textShadow: '0 0 20px rgba(255,255,255,0.15)' }}
@@ -142,12 +150,21 @@ export const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext
         ) : (
           /* ── Closing / short-body slides ── */
           <>
-            <h1
-              className={`font-black leading-tight text-center ${content.accentColorClass} animate-fade-up`}
-              style={{ fontSize: '9vw', textShadow: '0 0 60px currentColor, 0 0 120px currentColor' }}
-            >
-              {content.title}
-            </h1>
+            <div className="relative">
+              <h1
+                className="font-black leading-tight text-center absolute inset-0"
+                style={{ fontSize: '9vw', color: '#ffffff', filter: 'blur(30px)', opacity: 0.3 }}
+                aria-hidden="true"
+              >
+                {content.title}
+              </h1>
+              <h1
+                className="font-black leading-tight text-center gradient-text-animated animate-fade-up relative"
+                style={{ fontSize: '9vw' }}
+              >
+                {content.title}
+              </h1>
+            </div>
             {content.body && (
               <p
                 className="text-slate-300 text-4xl mt-6 text-center animate-slide-up-fade"

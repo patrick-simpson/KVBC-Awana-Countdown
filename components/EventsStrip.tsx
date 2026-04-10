@@ -37,43 +37,31 @@ export const EventsStrip: React.FC<EventsStripProps> = ({ events }) => {
   return (
     <div className="mt-6 flex justify-center">
       <div className="flex gap-3 flex-wrap justify-center max-w-2xl">
-        {specialEvents.map((event, idx) => (
-          <div
-            key={idx}
-            className="px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide text-white whitespace-nowrap"
-            style={{
-              background: `linear-gradient(135deg, ${
-                [
-                  'rgba(232, 25, 44, 0.3)',
-                  'rgba(255, 193, 7, 0.3)',
-                  'rgba(0, 114, 206, 0.3)',
-                  'rgba(0, 166, 81, 0.3)',
-                ][idx % 4]
-              }, ${
-                [
-                  'rgba(232, 25, 44, 0.15)',
-                  'rgba(255, 193, 7, 0.15)',
-                  'rgba(0, 114, 206, 0.15)',
-                  'rgba(0, 166, 81, 0.15)',
-                ][idx % 4]
-              })`,
-              border: `1px solid ${
-                [
-                  'rgba(232, 25, 44, 0.5)',
-                  'rgba(255, 193, 7, 0.5)',
-                  'rgba(0, 114, 206, 0.5)',
-                  'rgba(0, 166, 81, 0.5)',
-                ][idx % 4]
-              }`,
-              textShadow: '0 0 10px rgba(0,0,0,0.5)',
-              animation: `fadeIn 0.5s ease-out`,
-              animationDelay: `${idx * 0.1}s`,
-              animationFillMode: 'both',
-            }}
-          >
-            {getEventEmoji(event.title)} {event.title} · {formatDays(event.daysUntil)}
-          </div>
-        ))}
+        {specialEvents.map((event, idx) => {
+          const colors = [
+            { bg: 'rgba(232, 25, 44, 0.12)', border: 'rgba(232, 25, 44, 0.3)', glow: 'rgba(232, 25, 44, 0.15)' },
+            { bg: 'rgba(255, 193, 7, 0.12)', border: 'rgba(255, 193, 7, 0.3)', glow: 'rgba(255, 193, 7, 0.15)' },
+            { bg: 'rgba(0, 114, 206, 0.12)', border: 'rgba(0, 114, 206, 0.3)', glow: 'rgba(0, 114, 206, 0.15)' },
+            { bg: 'rgba(0, 166, 81, 0.12)', border: 'rgba(0, 166, 81, 0.3)', glow: 'rgba(0, 166, 81, 0.15)' },
+          ][idx % 4];
+          return (
+            <div
+              key={idx}
+              className="px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide text-white whitespace-nowrap backdrop-blur-xl"
+              style={{
+                background: colors.bg,
+                border: `1px solid ${colors.border}`,
+                boxShadow: `0 0 20px ${colors.glow}, inset 0 0 20px ${colors.glow}`,
+                textShadow: '0 0 10px rgba(0,0,0,0.5)',
+                animation: `fadeIn 0.5s ease-out`,
+                animationDelay: `${idx * 0.1}s`,
+                animationFillMode: 'both',
+              }}
+            >
+              {getEventEmoji(event.title)} {event.title} · {formatDays(event.daysUntil)}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
