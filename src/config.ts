@@ -10,16 +10,14 @@ export type ClubId = 'puggles' | 'cubbies' | 'sparks' | 'tnt';
 export interface Club {
   id: ClubId;
   name: string;
-  /** Catalog-style audience chip, e.g. "GRADES 3–6" */
-  audience: string;
   color: string;
 }
 
 export const CLUBS: Record<ClubId, Club> = {
-  puggles: { id: 'puggles', name: 'Puggles', audience: 'Ages 2–3', color: '#F7941D' },
-  cubbies: { id: 'cubbies', name: 'Cubbies', audience: 'Ages 3–5', color: '#0072CE' },
-  sparks: { id: 'sparks', name: 'Sparks', audience: 'Grades K–2', color: '#E8192C' },
-  tnt: { id: 'tnt', name: 'T&T', audience: 'Grades 3–6', color: '#00A651' },
+  puggles: { id: 'puggles', name: 'Puggles', color: '#F7941D' },
+  cubbies: { id: 'cubbies', name: 'Cubbies', color: '#0072CE' },
+  sparks: { id: 'sparks', name: 'Sparks', color: '#E8192C' },
+  tnt: { id: 'tnt', name: 'T&T', color: '#00A651' },
 };
 
 /* ── Slides ───────────────────────────────────────────────────────── */
@@ -46,17 +44,9 @@ export const AWANA_PLEDGE_TEXT = `I pledge allegiance to the Awana flag, which s
 export const DECKS: Record<DeckId, SlideDef[]> = {
   opening: [
     {
-      id: 'celebration',
-      layout: 'celebration',
-      title: "IT'S AWANA TIME!",
-      subtitle: 'Welcome, clubbers!',
-      duration: 8,
-    },
-    {
       id: 'welcome',
-      layout: 'welcome',
-      title: 'WELCOME!',
-      subtitle: "We're glad you're here!",
+      layout: 'celebration',
+      title: 'WELCOME TO AWANA',
       duration: 10,
     },
     {
