@@ -9,7 +9,7 @@ const PARTICLES = Array.from({ length: 45 }, (_, i) => ({
   duration: `${11 + (i % 9) * 1.8}s`,
   delay: `${-((i * 2.3) % 18)}s`,
   opacity: 0.10 + (i % 6) * 0.055,
-  color: ['#ffffff', '#FFC107', '#ff4d5e', '#4da6ff', '#4dff9e'][i % 5],
+  color: ['#FFFFFF', '#FFC107', '#E8192C', '#0072CE', '#00A651'][i % 5],
 }));
 
 export const ParticleField: React.FC = () => (
