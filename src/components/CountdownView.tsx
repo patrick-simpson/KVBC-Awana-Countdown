@@ -7,6 +7,7 @@ import { FlipDigit } from './FlipDigit';
 import { ConfettiBurst } from './ConfettiBurst';
 import { useWeather } from '../hooks/useWeather';
 import { useCalendarEvents } from '../hooks/useCalendarEvents';
+import { currentTime } from '../hooks/useClock';
 
 interface CountdownViewProps {
   onComplete: () => void;
@@ -49,35 +50,42 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
   title,
   clubColor,
 }) => {
-  const [timeLeft, setTimeLeft] = useState(0);
+  const targetTime = targetDate.getTime();
+  const calcRemaining = () => Math.max(0, Math.floor((targetTime - currentTime().getTime()) / 1000));
+
+  // Initialized from the real target so a fresh mount can never look
+  // "already complete" before the first tick lands.
+  const [timeLeft, setTimeLeft] = useState(calcRemaining);
   const [milestone, setMilestone] = useState<string | null>(null);
   const [milestonePhase, setMilestonePhase] = useState<'enter' | 'exit'>('enter');
   const [showConfetti, setShowConfetti] = useState(false);
   const shownMilestones = useRef(new Set<number>());
-  const hasCompletedRef = useRef(false);
+  const wasRunningRef = useRef(false);
 
   const isGameTime = !!clubColor;
   const weather = useWeather();
   const events = useCalendarEvents();
 
-  // Timer
+  // Timer — keyed on the target instant, not Date object identity.
   useEffect(() => {
-    const calc = () => {
-      const distance = targetDate.getTime() - Date.now();
-      if (distance <= 0) return 0;
-      return Math.floor(distance / 1000);
-    };
-    setTimeLeft(calc());
+    setTimeLeft(calcRemaining());
+    wasRunningRef.current = false;
     const timer = setInterval(() => {
-      setTimeLeft(calc());
+      setTimeLeft(calcRemaining());
     }, 1000);
     return () => clearInterval(timer);
-  }, [targetDate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetTime]);
 
-  // Countdown completion — confetti then transition
+  // Completion fires only on an observed running → zero transition,
+  // never because a target was already in the past at mount.
   useEffect(() => {
-    if (timeLeft <= 0 && !hasCompletedRef.current) {
-      hasCompletedRef.current = true;
+    if (timeLeft > 0) {
+      wasRunningRef.current = true;
+      return;
+    }
+    if (wasRunningRef.current) {
+      wasRunningRef.current = false;
       if (!isGameTime) {
         setShowConfetti(true);
       } else {
