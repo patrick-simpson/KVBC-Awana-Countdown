@@ -1,15 +1,20 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { CLUBS, type ScheduleWindow } from '../config';
 import { ScreenFrame } from '../components/ScreenFrame';
 import { AmbientOrbs } from '../components/AmbientOrbs';
 import { ParticleField } from '../components/ParticleField';
 import { SparkleDoodles } from '../components/SparkleDoodles';
 import { ClubWave } from '../components/ClubWave';
+import { ConfettiBurst } from '../components/ConfettiBurst';
 import { Logo } from '../components/Logo';
 import { Badge } from '../components/Badge';
 import { BigTimer } from '../components/BigTimer';
 import { GlowText } from '../components/GlowText';
 import { secondsUntil } from '../lib/schedule';
+import { birthdaysThisWeek } from '../lib/birthdays';
+import { DUR, EASE } from '../lib/motion-tokens';
+import { useBirthdays } from '../hooks/useBirthdays';
 
 interface GameTimeViewProps {
   now: Date;
@@ -26,6 +31,10 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
   const clubs = gameWindow.clubs.map((id) => CLUBS[id]);
   const primary = clubs[0];
   const secondary = clubs[1];
+
+  // This week's (Sun–Sat) birthdays for the club(s) on screen.
+  const roster = useBirthdays();
+  const celebrants = birthdaysThisWeek(roster, now).filter((b) => gameWindow.clubs.includes(b.club));
 
   const seconds = secondsUntil(endsAt, now);
   const endTimeStr = endsAt.toLocaleTimeString([], {
@@ -95,7 +104,38 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
         >
           Game ends at {endTimeStr}
         </GlowText>
+
+        {/* This week's birthdays for the club(s) on screen */}
+        {celebrants.length > 0 && (
+          <motion.div
+            className="flex flex-col items-center gap-3"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: DUR.base, ease: EASE.pop, delay: 0.25 }}
+          >
+            <GlowText
+              as="p"
+              size="script"
+              font="script"
+              color="#FFC107"
+              glow="sm"
+              style={{ fontWeight: 600 }}
+            >
+              happy birthday this week!
+            </GlowText>
+            <div className="flex gap-3 flex-wrap justify-center max-w-5xl">
+              {celebrants.map((b) => (
+                <Badge key={`${b.name}-${b.month}-${b.day}`} color={CLUBS[b.club].color} size="sm" sparkle>
+                  <span style={{ letterSpacing: 0 }}>🎂</span>
+                  {b.name}
+                </Badge>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </div>
+
+      {celebrants.length > 0 && <ConfettiBurst />}
     </ScreenFrame>
   );
 };

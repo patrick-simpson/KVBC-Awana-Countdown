@@ -47,6 +47,8 @@ npm run deploy    # Build + deploy to GitHub Pages via gh-pages
     ├── lib/
     │   ├── schedule.ts         # PURE schedule engine (tested)
     │   ├── schedule.test.ts    # boundary/DST/day-gate cases
+    │   ├── birthdays.ts        # PURE birthday CSV parse + Sun–Sat week match (tested)
+    │   ├── birthdays.test.ts   # CSV formats, club aliases, year-boundary/Feb-29 weeks
     │   ├── motion-tokens.ts    # DUR/EASE — JS mirror of the CSS timing tokens
     │   └── color.ts            # rgbTriple (glow colors), mulberry32 (seeded scatter)
     ├── hooks/
@@ -54,7 +56,8 @@ npm run deploy    # Build + deploy to GitHub Pages via gh-pages
     │   ├── useSchedule.ts      # resolved state + manual override (quick-nav)
     │   ├── useKeydown.ts       # shared keydown listener
     │   ├── useWeather.ts       # Open-Meteo, 15 min, silent failure
-    │   └── useCalendarEvents.ts# church calendar scrape, 30 min, CORS-proxy fallback
+    │   ├── useCalendarEvents.ts# church calendar scrape, 30 min, CORS-proxy fallback
+    │   └── useBirthdays.ts     # localStorage birthday roster + live change events
     ├── components/             # shared primitives
     │   ├── ScreenFrame.tsx     # black shell: brand bars top+bottom, scanlines, vignette
     │   ├── ClubWave.tsx        # signature catalog wave (SVG layers in club color)
@@ -100,6 +103,10 @@ Countdown completion must observe a running→zero transition — a countdown th
 - `useSchedule(now)` — resolved state + manual override (`select`/`resume`) for the quick-nav.
 - Mode changes crossfade via `AnimatePresence mode="wait"` keyed on `stateKey(state)`.
 - Data hooks (`useWeather`, `useCalendarEvents`) fail silently, abort on unmount, and refetch on `visibilitychange`.
+
+### Birthdays
+
+The QuickNav operator menu has an "Upload Birthdays CSV" control (template: `public/birthdays-template.csv`; columns name, birthday, club — header optional, flexible date formats and club spellings). The roster persists in localStorage on the display machine (`useBirthdays`). During each club's game-time window, that week's (Sun–Sat) birthdays for the club(s) on screen show as 🎂 chips with a confetti burst. Week matching lives in `src/lib/birthdays.ts` (pure, tested — including year-boundary weeks and Feb 29).
 
 ## Design Tokens & Conventions
 
