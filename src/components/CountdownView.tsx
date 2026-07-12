@@ -50,7 +50,6 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
   clubColor,
 }) => {
   const [timeLeft, setTimeLeft] = useState(0);
-  const [tickKey, setTickKey] = useState(0);
   const [milestone, setMilestone] = useState<string | null>(null);
   const [milestonePhase, setMilestonePhase] = useState<'enter' | 'exit'>('enter');
   const [showConfetti, setShowConfetti] = useState(false);
@@ -70,9 +69,7 @@ export const CountdownView: React.FC<CountdownViewProps> = ({
     };
     setTimeLeft(calc());
     const timer = setInterval(() => {
-      const next = calc();
-      setTimeLeft(next);
-      setTickKey(k => k + 1);
+      setTimeLeft(calc());
     }, 1000);
     return () => clearInterval(timer);
   }, [targetDate]);

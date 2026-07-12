@@ -8,9 +8,14 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
+    "test": "vitest run",
     "deploy": "npm run build && npx gh-pages -d dist"
   },
   "dependencies": {
+    "@fontsource-variable/caveat": "^5.2.8",
+    "@fontsource-variable/nunito-sans": "^5.2.7",
+    "@fontsource/barlow-condensed": "^5.2.8",
+    "@fontsource/lilita-one": "^5.2.8",
     "@tailwindcss/vite": "^4.2.2",
     "@vitejs/plugin-react": "^6.0.1",
     "lucide-react": "^0.577.0",
@@ -25,6 +30,7 @@
     "@types/react-dom": "^19.2.3",
     "gh-pages": "^6.3.0",
     "typescript": "~5.8.2",
-    "vite": "^8.0.1"
+    "vite": "^8.0.1",
+    "vitest": "^4.1.10"
   }
 }

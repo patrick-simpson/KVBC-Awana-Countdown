@@ -5,7 +5,6 @@ import { ParticleField } from './ParticleField';
 
 interface SlideProps {
   content: SlideContent;
-  isExiting?: boolean;
   onNext?: () => void;
 }
 
@@ -18,7 +17,7 @@ const SLIDE_ORBS = [
   { color: '#FFC107', size: '32vw', top: '-12%', left: '63%',  duration: 38, delay: -14, opacity: 0.08 },
 ];
 
-export const Slide: React.FC<SlideProps> = ({ content, isExiting = false, onNext }) => {
+export const Slide: React.FC<SlideProps> = ({ content, onNext }) => {
   const [now, setNow] = useState(new Date());
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
