@@ -12,7 +12,7 @@ import { Badge } from '../components/Badge';
 import { BigTimer } from '../components/BigTimer';
 import { GlowText } from '../components/GlowText';
 import { secondsUntil } from '../lib/schedule';
-import { birthdaysThisWeek } from '../lib/birthdays';
+import { birthdaysThisWeek, listNames } from '../lib/birthdays';
 import { DUR, EASE } from '../lib/motion-tokens';
 import { useBirthdays } from '../hooks/useBirthdays';
 
@@ -108,7 +108,7 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
         {/* This week's birthdays for the club(s) on screen */}
         {celebrants.length > 0 && (
           <motion.div
-            className="flex flex-col items-center gap-3"
+            className="flex flex-col items-center mt-2"
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: DUR.base, ease: EASE.pop, delay: 0.25 }}
@@ -119,18 +119,20 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
               font="script"
               color="#FFC107"
               glow="sm"
-              style={{ fontWeight: 600 }}
+              style={{ fontWeight: 600, transform: 'rotate(-2deg)' }}
             >
-              happy birthday this week!
+              happy birthday
             </GlowText>
-            <div className="flex gap-3 flex-wrap justify-center max-w-5xl">
-              {celebrants.map((b) => (
-                <Badge key={`${b.name}-${b.month}-${b.day}`} color={CLUBS[b.club].color} size="sm" sparkle>
-                  <span style={{ letterSpacing: 0 }}>🎂</span>
-                  {b.name}
-                </Badge>
-              ))}
-            </div>
+            <GlowText
+              as="p"
+              size="script"
+              font="display"
+              color="#FFFFFF"
+              glow="md"
+              className="text-center max-w-6xl leading-tight"
+            >
+              {listNames(celebrants.map((b) => b.name))}
+            </GlowText>
           </motion.div>
         )}
       </div>

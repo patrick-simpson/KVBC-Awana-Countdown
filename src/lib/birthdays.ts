@@ -149,6 +149,12 @@ export function parseBirthdayCSV(text: string): ParseResult {
   return { entries, errors };
 }
 
+/** "Ava" · "Ava & Liam" · "Ava, Liam & Noah" — for the on-screen line. */
+export function listNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? '';
+  return `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`;
+}
+
 /* ── Week matching ────────────────────────────────────────────────── */
 
 /** Sunday (local midnight) of the week containing `date`. */

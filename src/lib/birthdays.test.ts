@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   birthdaysThisWeek,
+  listNames,
   normalizeClub,
   parseBirthdayCSV,
   parseBirthdayDate,
@@ -92,6 +93,15 @@ describe('parseBirthdayCSV', () => {
 
   it('returns nothing for an empty file', () => {
     expect(parseBirthdayCSV('')).toEqual({ entries: [], errors: [] });
+  });
+});
+
+describe('listNames', () => {
+  it('joins names for display', () => {
+    expect(listNames([])).toBe('');
+    expect(listNames(['Ava'])).toBe('Ava');
+    expect(listNames(['Ava', 'Liam'])).toBe('Ava & Liam');
+    expect(listNames(['Ava', 'Liam', 'Noah'])).toBe('Ava, Liam & Noah');
   });
 });
 
