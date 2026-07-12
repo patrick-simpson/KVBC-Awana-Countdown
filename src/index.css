@@ -1,10 +1,46 @@
+/* ════════════════════════════════════════════════════════════════════
+   KVBC Awana Presentation Tool — design system
+   Fonts are bundled locally via @fontsource (projector-safe: no runtime
+   Google Fonts requests). Display language follows the 2026–27 Awana
+   catalog: chunky rounded caps, condensed sub-heads, sparkle doodles,
+   organic club-color waves — all glowing over pure #000000.
+   ════════════════════════════════════════════════════════════════════ */
+@import "@fontsource/lilita-one";
+@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/barlow-condensed/700.css";
+@import "@fontsource/barlow-condensed/800.css";
+@import "@fontsource-variable/nunito-sans";
+@import "@fontsource-variable/caveat";
+
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* ── Typography ─────────────────────────────────────────────── */
+  --font-display: "Lilita One", "Arial Black", system-ui, sans-serif;
+  --font-condensed: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Nunito Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-script: "Caveat Variable", "Comic Sans MS", cursive;
 
-  /* ── Existing animations ── */
+  /* ── Awana brand palette (single source of truth) ───────────── */
+  --color-brand-red: #E8192C;
+  --color-brand-blue: #0072CE;
+  --color-brand-green: #00A651;
+  --color-brand-yellow: #FFC107;
+  --color-brand-orange: #F7941D;
+  --color-amber-hot: #FFB627;
+
+  /* Per-club colors — 2026–27 catalog mapping */
+  --color-club-sparks: #E8192C;
+  --color-club-tnt: #00A651;
+  --color-club-cubbies: #0072CE;
+  --color-club-puggles: #F7941D;
+
+  /* Ink scale (text over black) */
+  --color-ink-hi: #FFFFFF;
+  --color-ink-mid: rgb(255 255 255 / 0.72);
+  --color-ink-low: rgb(255 255 255 / 0.42);
+
+  /* ── Ambient keyframes (infinite loops stay in CSS) ─────────── */
   @keyframes gradientShift {
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -16,29 +52,15 @@
     75%  { transform: translate(28px, 12px) scale(1.02); }
     100% { transform: translate(0px, 0px) scale(1); }
   }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes popIn {
-    0%   { opacity: 0; transform: scale(0.6); }
-    65%  { opacity: 1; transform: scale(1.04); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  @keyframes slideUpFade {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
+  @keyframes waveDrift {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(-1.5%) scale(1.03); }
   }
   @keyframes particleFloat {
     0%   { transform: translateY(0);       opacity: 0; }
     8%   { opacity: 1; }
     88%  { opacity: 0.9; }
     100% { transform: translateY(-110vh);  opacity: 0; }
-  }
-  @keyframes tickPulse {
-    0%   { transform: scale(1); }
-    20%  { transform: scale(1.022); }
-    100% { transform: scale(1); }
   }
   @keyframes pulseRing {
     0%   { transform: scale(0.75); opacity: 0.85; }
@@ -68,44 +90,16 @@
     0%, 10%, 100% { opacity: 0; }
     5%, 8% { opacity: 0.15; }
   }
-  @keyframes sunRay {
-    0%   { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
   @keyframes cloudDrift {
     0%   { transform: translateX(-150px); }
     50%  { transform: translateX(150px); }
     100% { transform: translateX(-150px); }
   }
-  @keyframes birdFly {
-    0%   { transform: translateX(-100px) translateY(0); opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 1; }
-    100% { transform: translateX(100vw) translateY(-50px); opacity: 0; }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── Flip digit ── */
-  @keyframes digitRollOut {
-    0%   { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-100%); opacity: 0; }
-  }
-  @keyframes digitRollIn {
-    0%   { transform: translateY(80%); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
-  }
-
-  /* ── Confetti burst ── */
   @keyframes confettiExplode {
     0%   { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
     12%  { transform: translate(calc(-50% + var(--cx) * 0.5), calc(-50% + var(--cy) * 0.5)) scale(1) rotate(calc(var(--cr) * 0.3)); opacity: 1; }
     100% { transform: translate(calc(-50% + var(--cx)), calc(-50% + var(--cy) + 50vh)) scale(0.3) rotate(var(--cr)); opacity: 0; }
   }
-
-  /* ── Starfield ── */
   @keyframes twinkle {
     0%, 100% { opacity: var(--star-min, 0.15); }
     50%      { opacity: var(--star-max, 0.7); }
@@ -115,16 +109,12 @@
     3%   { opacity: 1; transform: translateX(0) translateY(0) scaleX(1); }
     100% { transform: translateX(var(--shoot-x, 250px)) translateY(var(--shoot-y, 150px)) scaleX(1); opacity: 0; }
   }
-
-  /* ── Aurora color wave ── */
   @keyframes auroraWave {
     0%   { transform: translateX(-30%) skewX(-5deg) scaleY(1); }
     33%  { transform: translateX(10%) skewX(3deg) scaleY(1.3); }
     66%  { transform: translateX(-10%) skewX(-3deg) scaleY(0.7); }
     100% { transform: translateX(-30%) skewX(-5deg) scaleY(1); }
   }
-
-  /* ── Seasonal overlays ── */
   @keyframes leafFall {
     0%   { transform: translateY(-10vh) rotate(0deg) translateX(0); opacity: 0; }
     10%  { opacity: 0.6; }
@@ -152,25 +142,10 @@
     50%  { transform: translateY(50vh) rotate(180deg) translateX(-40px); opacity: 0.35; }
     100% { transform: translateY(110vh) rotate(360deg) translateX(20px); opacity: 0; }
   }
-
-  /* ── Colon pulse ── */
   @keyframes colonPulse {
     0%, 100% { opacity: 1; }
     50%      { opacity: 0.25; }
   }
-
-  /* ── Milestone callout ── */
-  @keyframes milestoneEnter {
-    0%   { transform: scale(0.3) translateY(20px); opacity: 0; filter: blur(10px); }
-    60%  { transform: scale(1.08) translateY(-4px); opacity: 1; filter: blur(0); }
-    100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
-  }
-  @keyframes milestoneExit {
-    0%   { transform: scale(1); opacity: 1; filter: blur(0); }
-    100% { transform: scale(1.4) translateY(-30px); opacity: 0; filter: blur(8px); }
-  }
-
-  /* ── Screen shake (urgency) ── */
   @keyframes screenShake {
     0%, 100% { transform: translate(0, 0); }
     10%  { transform: translate(-1px, 1px); }
@@ -183,22 +158,199 @@
     80%  { transform: translate(-1px, -1px); }
     90%  { transform: translate(1px, 1px); }
   }
-
-  /* ── Gradient text ── */
   @keyframes gradientTextShift {
     0%   { background-position: 0% center; }
     100% { background-position: 200% center; }
   }
-
-  /* ── Logo glow ── */
   @keyframes logoGlow {
     0%, 100% { box-shadow: 0 0 20px rgba(232,25,44,0.4), 0 0 40px rgba(232,25,44,0.1); }
     25%  { box-shadow: 0 0 20px rgba(255,193,7,0.4), 0 0 40px rgba(255,193,7,0.1); }
     50%  { box-shadow: 0 0 20px rgba(0,114,206,0.4), 0 0 40px rgba(0,114,206,0.1); }
     75%  { box-shadow: 0 0 20px rgba(0,166,81,0.4), 0 0 40px rgba(0,166,81,0.1); }
   }
+  @keyframes sparkleSpin {
+    0%, 100% { transform: rotate(0deg) scale(1); opacity: var(--star-min, 0.3); }
+    50%      { transform: rotate(20deg) scale(1.15); opacity: var(--star-max, 0.9); }
+  }
+}
 
-  /* ── 3D slide transitions ── */
+:root {
+  /* ── Glow scale — set --glow-color (as "R G B") per element ──── */
+  --glow-color: 255 255 255;
+  --glow-sm: 0 0 12px rgb(var(--glow-color) / 0.55);
+  --glow-md: 0 0 20px rgb(var(--glow-color) / 0.9),
+             0 0 55px rgb(var(--glow-color) / 0.45);
+  --glow-lg: 0 0 20px rgb(var(--glow-color) / 1),
+             0 0 60px rgb(var(--glow-color) / 0.7),
+             0 0 140px rgb(var(--glow-color) / 0.35);
+
+  /* ── Timing scale — mirrored in src/lib/motion-tokens.ts ─────── */
+  --dur-fast: 150ms;
+  --dur-base: 300ms;
+  --dur-slow: 600ms;
+  --dur-mode: 800ms;
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Radius scale ─────────────────────────────────────────────── */
+  --radius-chip: 999px;
+  --radius-card: 1.5rem;
+
+  /* ── Type scale (projector: huge, clamped for dev windows) ───── */
+  --text-timer: clamp(6rem, 20vw, 26rem);
+  --text-timer-days: clamp(3.5rem, 10vw, 13rem);
+  --text-display: clamp(4rem, 13vw, 17rem);
+  --text-h1: clamp(3rem, 8vw, 10rem);
+  --text-pledge: clamp(2.5rem, 5.4vw, 6.5rem);
+  --text-eyebrow: clamp(1.1rem, 1.8vw, 2.2rem);
+  --text-body-lg: clamp(1.4rem, 2.4vw, 2.75rem);
+  --text-script: clamp(1.75rem, 3vw, 3.5rem);
+  --tracking-eyebrow: 0.35em;
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000000;
+  }
+  body {
+    font-family: var(--font-body);
+  }
+}
+
+/* ── Brand bar gradient ── */
+.brand-bar-animated {
+  background: linear-gradient(90deg,
+    var(--color-brand-red), var(--color-brand-yellow), var(--color-brand-blue),
+    var(--color-brand-green), var(--color-brand-red));
+  background-size: 300% 100%;
+  animation: gradientShift 12s ease infinite;
+}
+
+/* ── Orbit ── */
+.animate-orbit {
+  animation: orbitDrift ease-in-out infinite;
+}
+
+/* ── Club wave drift ── */
+.animate-wave-drift {
+  animation: waveDrift 14s ease-in-out infinite;
+}
+
+/* ── Particle float ── */
+.animate-particle-float {
+  animation: particleFloat linear infinite;
+}
+
+/* ── Urgency pulse ring ── */
+.animate-pulse-ring {
+  animation: pulseRing 1.4s ease-out infinite;
+}
+
+/* ── Breathing ── */
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* ── Sparkle doodle twinkle ── */
+.animate-sparkle {
+  animation: sparkleSpin ease-in-out infinite;
+}
+
+/* ── Shimmer text ── */
+.text-shimmer {
+  background: linear-gradient(90deg,
+    var(--color-brand-yellow) 0%, #fff 40%, var(--color-brand-yellow) 60%,
+    #fff 80%, var(--color-brand-yellow) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerText 4s linear infinite;
+}
+
+/* ── Gradient text (brand rainbow) ── */
+.gradient-text-animated {
+  background: linear-gradient(90deg,
+    var(--color-brand-red), var(--color-brand-yellow), var(--color-brand-blue),
+    var(--color-brand-green), var(--color-brand-red));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientTextShift 6s linear infinite;
+}
+
+/* ── Warm amber gradient text (catalog flagship accent) ── */
+.gradient-text-amber {
+  background: linear-gradient(90deg,
+    var(--color-brand-orange), var(--color-brand-yellow), var(--color-amber-hot),
+    var(--color-brand-orange));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientTextShift 8s linear infinite;
+}
+
+/* ── Logo glow ── */
+.animate-logo-glow {
+  animation: logoGlow 8s ease-in-out infinite;
+}
+
+/* ── Screen shake ── */
+.animate-screen-shake {
+  animation: screenShake 0.3s ease-in-out infinite;
+}
+
+/* ── Glow text helper: pair with style={{'--glow-color': 'R G B'}} ── */
+.glow-sm { text-shadow: var(--glow-sm); }
+.glow-md { text-shadow: var(--glow-md); }
+.glow-lg { text-shadow: var(--glow-lg); }
+
+/* ════════════════════════════════════════════════════════════════════
+   LEGACY BLOCK — used only by the pre-rewrite views; delete when
+   CountdownView/SlideshowView/Slide/EventsStrip are replaced.
+   ════════════════════════════════════════════════════════════════════ */
+@theme {
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes popIn {
+    0%   { opacity: 0; transform: scale(0.6); }
+    65%  { opacity: 1; transform: scale(1.04); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes digitRollOut {
+    0%   { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-100%); opacity: 0; }
+  }
+  @keyframes digitRollIn {
+    0%   { transform: translateY(80%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes milestoneEnter {
+    0%   { transform: scale(0.3) translateY(20px); opacity: 0; filter: blur(10px); }
+    60%  { transform: scale(1.08) translateY(-4px); opacity: 1; filter: blur(0); }
+    100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+  }
+  @keyframes milestoneExit {
+    0%   { transform: scale(1); opacity: 1; filter: blur(0); }
+    100% { transform: scale(1.4) translateY(-30px); opacity: 0; filter: blur(8px); }
+  }
   @keyframes slideFlipOutLeft {
     0%   { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
     100% { transform: perspective(1200px) rotateY(-90deg); opacity: 0; }
@@ -215,82 +367,15 @@
     0%   { transform: perspective(1200px) rotateY(-90deg); opacity: 0; }
     100% { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
   }
-
-  /* ── Scoreboard frame pulse ── */
   @keyframes scoreboardPulse {
     0%, 100% { opacity: 0.6; }
     50%      { opacity: 1; }
   }
 }
-
-@layer base {
-  html, body, #root {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: black;
-  }
-  body {
-    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
-  }
-}
-
-/* ── Brand bar gradient ── */
-.brand-bar-animated {
-  background: linear-gradient(90deg, #E8192C, #FFC107, #0072CE, #00A651, #E8192C);
-  background-size: 300% 100%;
-  animation: gradientShift 12s ease infinite;
-}
-
-/* ── Orbit ── */
-.animate-orbit {
-  animation: orbitDrift ease-in-out infinite;
-}
-
-/* ── Entrance animations ── */
-.animate-fade-up {
-  animation: fadeUp 0.5s ease-out forwards;
-}
-.animate-pop-in {
-  animation: popIn 0.9s cubic-bezier(0.26, 0.53, 0.74, 1.48) forwards;
-}
-.animate-slide-up-fade {
-  animation: slideUpFade 0.7s ease-out 0.5s both;
-}
-
-/* ── Particle float ── */
-.animate-particle-float {
-  animation: particleFloat linear infinite;
-}
-
-/* ── Timer tick ── */
-.animate-tick-pulse {
-  animation: tickPulse 0.45s ease-out both;
-}
-
-/* ── Urgency pulse ring ── */
-.animate-pulse-ring {
-  animation: pulseRing 1.4s ease-out infinite;
-}
-
-/* ── Breathing animation ── */
-.animate-breathe {
-  animation: breathe 3s ease-in-out infinite;
-}
-
-/* ── Shimmer text ── */
-.text-shimmer {
-  background: linear-gradient(90deg, #FFC107 0%, #fff 40%, #FFC107 60%, #fff 80%, #FFC107 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmerText 4s linear infinite;
-}
-
-/* ── Flip digit ── */
+.animate-fade-up { animation: fadeUp 0.5s ease-out forwards; }
+.animate-pop-in { animation: popIn 0.9s cubic-bezier(0.26, 0.53, 0.74, 1.48) forwards; }
+.animate-slide-up-fade { animation: slideUpFade 0.7s ease-out 0.5s both; }
+.animate-scoreboard-pulse { animation: scoreboardPulse 3s ease-in-out infinite; }
 .flip-digit {
   display: inline-flex;
   position: relative;
@@ -310,29 +395,4 @@
 }
 .flip-digit-in {
   animation: digitRollIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-/* ── Gradient text ── */
-.gradient-text-animated {
-  background: linear-gradient(90deg, #E8192C, #FFC107, #0072CE, #00A651, #E8192C);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradientTextShift 6s linear infinite;
-}
-
-/* ── Logo glow ── */
-.animate-logo-glow {
-  animation: logoGlow 8s ease-in-out infinite;
-}
-
-/* ── Screen shake ── */
-.animate-screen-shake {
-  animation: screenShake 0.3s ease-in-out infinite;
-}
-
-/* ── Scoreboard frame ── */
-.animate-scoreboard-pulse {
-  animation: scoreboardPulse 3s ease-in-out infinite;
 }
