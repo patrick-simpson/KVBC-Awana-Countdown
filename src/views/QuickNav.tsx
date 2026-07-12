@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CLUBS, WEDNESDAY_SCHEDULE } from '../config';
 import { stateKey, stateForWindow, type ResolvedState } from '../lib/schedule';
+import { parseBirthdayCSV } from '../lib/birthdays';
 import type { NavTarget } from '../hooks/useSchedule';
+import { clearBirthdays, saveBirthdays, useBirthdays } from '../hooks/useBirthdays';
 import { GlassPanel } from '../components/GlassPanel';
 
 interface QuickNavProps {
@@ -47,8 +49,86 @@ export const QuickNav: React.FC<QuickNavProps> = ({ state, isOverride, onSelect,
               Resume Schedule
             </button>
           )}
+          <BirthdayUpload />
         </GlassPanel>
       </div>
+    </div>
+  );
+};
+
+/**
+ * Operator control for the birthday roster: pick a CSV (name, birthday,
+ * club per row), which is parsed and stored in localStorage. Birthdays
+ * then appear on each club's game-time screen during their week.
+ */
+const BirthdayUpload: React.FC = () => {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const birthdays = useBirthdays();
+  const [notice, setNotice] = useState<{ text: string; ok: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(null), 6000);
+    return () => clearTimeout(timer);
+  }, [notice]);
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file) return;
+    try {
+      const { entries, errors } = parseBirthdayCSV(await file.text());
+      if (entries.length === 0) {
+        setNotice({ text: 'No valid rows (need name, birthday, club)', ok: false });
+        return;
+      }
+      saveBirthdays(entries);
+      setNotice({
+        text: `${entries.length} birthdays loaded${errors.length > 0 ? ` · ${errors.length} skipped` : ''}`,
+        ok: true,
+      });
+    } catch {
+      setNotice({ text: 'Could not read that file', ok: false });
+    }
+  };
+
+  return (
+    <div
+      className="mt-2 pt-2 border-t border-white/10 flex flex-col gap-1"
+      style={{ fontFamily: 'var(--font-condensed)', letterSpacing: '0.12em' }}
+    >
+      <input ref={fileRef} type="file" accept=".csv,text/csv" className="hidden" onChange={onFile} />
+      <button
+        onClick={() => fileRef.current?.click()}
+        className="px-3 py-1.5 text-xs uppercase text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all text-right flex items-center justify-end gap-2"
+        style={{ fontWeight: 700 }}
+      >
+        Upload Birthdays CSV
+        <span style={{ letterSpacing: 0 }}>🎂</span>
+      </button>
+      {birthdays.length > 0 && (
+        <div className="px-3 flex items-center justify-end gap-2 text-[0.65rem] uppercase text-gray-500">
+          <span style={{ fontWeight: 700 }}>{birthdays.length} loaded</span>
+          <button
+            onClick={() => {
+              clearBirthdays();
+              setNotice({ text: 'Birthdays cleared', ok: true });
+            }}
+            className="text-red-400/70 hover:text-red-400 transition-colors"
+            style={{ fontWeight: 700 }}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+      {notice && (
+        <p
+          className={`px-3 text-right text-[0.65rem] uppercase ${notice.ok ? 'text-emerald-400' : 'text-amber-400'}`}
+          style={{ fontWeight: 700 }}
+        >
+          {notice.text}
+        </p>
+      )}
     </div>
   );
 };
