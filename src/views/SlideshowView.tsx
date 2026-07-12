@@ -93,7 +93,8 @@ export const SlideshowView: React.FC<SlideshowViewProps> = ({ deck, now, onExit 
       <AnimatePresence>
         {escArmed && (
           <motion.div
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50"
+            className="absolute left-1/2 -translate-x-1/2 z-50"
+            style={{ bottom: 'var(--safe-y)' }}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
@@ -107,7 +108,10 @@ export const SlideshowView: React.FC<SlideshowViewProps> = ({ deck, now, onExit 
       </AnimatePresence>
 
       {/* Hover navigation */}
-      <div className="fixed bottom-8 right-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+      <div
+        className="fixed opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50"
+        style={{ bottom: 'var(--safe-y)', right: 'var(--safe-x)' }}
+      >
         <GlassPanel className="flex gap-1 p-1">
           <NavPill disabled={index === 0} onClick={goPrev}>
             <ChevronLeft size={16} strokeWidth={2.5} />

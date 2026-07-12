@@ -30,7 +30,7 @@ export const ConfettiBurst: React.FC<ConfettiBurstProps> = ({ onComplete }) => {
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden edge-mask">
       {CONFETTI_PIECES.map(piece => (
         <div
           key={piece.id}

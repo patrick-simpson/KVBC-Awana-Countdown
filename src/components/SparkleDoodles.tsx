@@ -46,10 +46,11 @@ export const SparkleDoodles: React.FC<SparkleDoodlesProps> = ({
     const items: Doodle[] = [];
     let guard = 0;
     while (items.length < count && guard++ < count * 20) {
-      const left = 2 + rand() * 94;
-      const top = 3 + rand() * 90;
-      // keep the middle clear for the main content
-      if (left > 22 && left < 78 && top > 22 && top < 78) continue;
+      // scatter inside the projection-safe band: clear of the content
+      // in the middle AND of the edge fade at the frame
+      const left = 8 + rand() * 84;
+      const top = 9 + rand() * 82;
+      if (left > 24 && left < 76 && top > 24 && top < 76) continue;
       items.push({
         id: items.length,
         kind: KINDS[Math.floor(rand() * KINDS.length)],

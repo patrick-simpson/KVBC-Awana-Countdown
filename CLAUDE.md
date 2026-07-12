@@ -59,7 +59,9 @@ npm run deploy    # Build + deploy to GitHub Pages via gh-pages
     │   ├── useCalendarEvents.ts# church calendar scrape, 30 min, CORS-proxy fallback
     │   └── useBirthdays.ts     # localStorage birthday roster + live change events
     ├── components/             # shared primitives
-    │   ├── ScreenFrame.tsx     # black shell: brand bars top+bottom, scanlines, vignette
+    │   ├── ScreenFrame.tsx     # black shell: stage glow, vignette, EdgeFade projection mask
+    │   ├── EdgeFade.tsx        # feathers all ambience to #000 before the frame edge
+    │   ├── StageGlow.tsx       # floating club-color light pool behind content
     │   ├── ClubWave.tsx        # signature catalog wave (SVG layers in club color)
     │   ├── SparkleDoodles.tsx  # seeded sparkle/star/squiggle/zigzag scatter
     │   ├── Badge.tsx           # catalog chip (+ SparkleIcon)
@@ -67,7 +69,7 @@ npm run deploy    # Build + deploy to GitHub Pages via gh-pages
     │   ├── BigTimer.tsx / DigitReel.tsx # huge odometer timer
     │   ├── AmbientOrbs.tsx / Vignette.tsx / GlassPanel.tsx / Logo.tsx
     │   ├── EventChips.tsx      # calendar chips on Badge
-    │   ├── WeatherScene.tsx / ParticleField.tsx / ConfettiBurst.tsx / BrandBar.tsx
+    │   ├── WeatherScene.tsx / ParticleField.tsx / ConfettiBurst.tsx
     │   └── ViewErrorBoundary.tsx # per-view, on-brand, dependency-free fallback
     └── views/
         ├── CountdownView.tsx   # week-long countdown
@@ -145,13 +147,15 @@ No `.env` files. Configuration lives in source:
 
 ## Design Rules
 
-These rules are mandatory. Every change must satisfy all three:
+These rules are mandatory. Every change must satisfy all four:
 
 1. **Broadcast-ready quality.** Every screen must look polished enough for live broadcast: smooth transitions, animated effects, professional typography in the catalog language. No raw/unstyled elements, no layout jank, no abrupt state changes.
 
 2. **Pure black backgrounds.** The app is projected onto a blank wall. All page backgrounds must be `#000000`. Component surfaces (badges, glass panels) may be near-black, but the page behind them never is anything but true black.
 
-3. **Never revert functionality.** Changes must be additive. Do not remove, disable, or regress existing features, animations, keyboard shortcuts, or visual effects. If a feature needs to change, replace it with something equal or better.
+3. **Nothing bright may touch the frame edge.** The projector rectangle must stay invisible on the wall: every ambient layer feathers to `#000` inside the `--edge-fade` band (via `EdgeFade` in ScreenFrame, or the `.edge-mask` utility for layers above it like confetti/weather), and all content stays inside the `--safe-x`/`--safe-y` title-safe insets. No full-width/full-height bright elements, no hard clips at the frame boundary, no full-frame flashes.
+
+4. **Never revert functionality.** Changes must be additive. Do not remove, disable, or regress existing features, animations, keyboard shortcuts, or visual effects. If a feature needs to change, replace it with something equal or better.
 
 ## Important Notes for AI Assistants
 

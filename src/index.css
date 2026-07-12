@@ -88,7 +88,7 @@
   }
   @keyframes thunderFlash {
     0%, 10%, 100% { opacity: 0; }
-    5%, 8% { opacity: 0.15; }
+    5%, 8% { opacity: 0.22; }
   }
   @keyframes cloudDrift {
     0%   { transform: translateX(-150px); }
@@ -177,12 +177,14 @@
 :root {
   /* ── Glow scale — set --glow-color (as "R G B") per element ──── */
   --glow-color: 255 255 255;
-  --glow-sm: 0 0 12px rgb(var(--glow-color) / 0.55);
+  /* Outer halos run ~15% hotter than screen-normal: projectors wash
+     out dim values on a white wall. */
+  --glow-sm: 0 0 12px rgb(var(--glow-color) / 0.62);
   --glow-md: 0 0 20px rgb(var(--glow-color) / 0.9),
-             0 0 55px rgb(var(--glow-color) / 0.45);
+             0 0 55px rgb(var(--glow-color) / 0.52);
   --glow-lg: 0 0 20px rgb(var(--glow-color) / 1),
-             0 0 60px rgb(var(--glow-color) / 0.7),
-             0 0 140px rgb(var(--glow-color) / 0.35);
+             0 0 60px rgb(var(--glow-color) / 0.8),
+             0 0 140px rgb(var(--glow-color) / 0.4);
 
   /* ── Timing scale — mirrored in src/lib/motion-tokens.ts ─────── */
   --dur-fast: 150ms;
@@ -195,6 +197,15 @@
   /* ── Radius scale ─────────────────────────────────────────────── */
   --radius-chip: 999px;
   --radius-card: 1.5rem;
+
+  /* ── Projection seamlessness (projector on a white wall) ─────────
+     --edge-fade: width of the black feather that dissolves every
+     ambient layer before the frame edge (EdgeFade / .edge-mask).
+     --safe-x/y: title-safe insets — no content sits closer to the
+     frame edge than this. */
+  --edge-fade: 7vmin;
+  --safe-x: clamp(3rem, 6vw, 8rem);
+  --safe-y: clamp(2rem, 5.5vh, 5.5rem);
 
   /* ── Type scale (projector: huge, clamped for dev windows) ───── */
   --text-timer: clamp(6rem, 20vw, 26rem);
@@ -222,13 +233,34 @@
   }
 }
 
-/* ── Brand bar gradient ── */
-.brand-bar-animated {
+/* ── Brand rule: short floating rainbow accent (replaces the old
+      edge-flush brand bars) — the tips dissolve so it never reads
+      as a rectangle marker on the wall ── */
+.brand-rule {
   background: linear-gradient(90deg,
     var(--color-brand-red), var(--color-brand-yellow), var(--color-brand-blue),
     var(--color-brand-green), var(--color-brand-red));
   background-size: 300% 100%;
   animation: gradientShift 12s ease infinite;
+  mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+}
+
+/* ── Edge mask: for layers that render ABOVE the EdgeFade overlay
+      (confetti, weather) — fades their pixels out over the same
+      --edge-fade band so nothing bright crosses the frame edge ── */
+.edge-mask {
+  /* Eased profile: essentially invisible in the outer fifth of the
+     band, then ramping in — matches EdgeFade's falloff */
+  mask-image:
+    linear-gradient(to right,
+      transparent, rgb(0 0 0 / 0.03) calc(var(--edge-fade) * 0.2), rgb(0 0 0 / 0.4) calc(var(--edge-fade) * 0.6), #000 var(--edge-fade),
+      #000 calc(100% - var(--edge-fade)), rgb(0 0 0 / 0.4) calc(100% - var(--edge-fade) * 0.6), rgb(0 0 0 / 0.03) calc(100% - var(--edge-fade) * 0.2), transparent),
+    linear-gradient(to bottom,
+      transparent, rgb(0 0 0 / 0.03) calc(var(--edge-fade) * 0.2), rgb(0 0 0 / 0.4) calc(var(--edge-fade) * 0.6), #000 var(--edge-fade),
+      #000 calc(100% - var(--edge-fade)), rgb(0 0 0 / 0.4) calc(100% - var(--edge-fade) * 0.6), rgb(0 0 0 / 0.03) calc(100% - var(--edge-fade) * 0.2), transparent);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
 }
 
 /* ── Orbit ── */

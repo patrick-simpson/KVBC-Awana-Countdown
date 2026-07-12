@@ -3,7 +3,7 @@ import React from 'react';
 // Deterministic particles — no randomization on each render
 const PARTICLES = Array.from({ length: 45 }, (_, i) => ({
   id: i,
-  left: `${(i * 31 + 13) % 96 + 2}%`,
+  left: `${(i * 31 + 13) % 88 + 6}%`,
   bottom: `${(i * 19 + 3) % 18}%`,
   size: `${1.2 + (i % 4) * 0.7}px`,
   duration: `${11 + (i % 9) * 1.8}s`,

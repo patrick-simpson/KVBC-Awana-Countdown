@@ -46,6 +46,7 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
   return (
     <ScreenFrame
       vignette="deep"
+      glowColor={primary.color}
       layers={
         <>
           <AmbientOrbs tint={primary.color} />
@@ -66,7 +67,7 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
         </>
       }
     >
-      <div className="absolute top-6 left-8 z-20">
+      <div className="absolute z-20" style={{ top: 'var(--safe-y)', left: 'var(--safe-x)' }}>
         <Logo />
       </div>
 

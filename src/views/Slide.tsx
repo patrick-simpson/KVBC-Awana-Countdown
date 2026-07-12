@@ -39,8 +39,11 @@ export const Slide: React.FC<SlideProps> = ({ slide, now, onNext }) => {
         </>
       }
     >
-      {/* Header row */}
-      <div className="flex items-center justify-between px-10 py-5 flex-shrink-0">
+      {/* Header row (inside the title-safe area) */}
+      <div
+        className="flex items-center justify-between flex-shrink-0"
+        style={{ padding: 'var(--safe-y) var(--safe-x) 1.25rem' }}
+      >
         <Logo size="sm" />
         {slide.showClock && (
           <div
@@ -58,10 +61,11 @@ export const Slide: React.FC<SlideProps> = ({ slide, now, onNext }) => {
         )}
       </div>
 
-      {/* Divider */}
-      <div className="relative mx-10 flex-shrink-0">
-        <div className="h-px bg-white/10" />
-        <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mt-px" />
+      {/* Floating brand rule — a short centered rainbow accent whose
+          tips dissolve (the old near-full-width divider marked the
+          projector rectangle) */}
+      <div className="flex justify-center flex-shrink-0">
+        <div className="brand-rule h-[3px] w-full max-w-[28rem] rounded-full" />
       </div>
 
       {/* Body */}

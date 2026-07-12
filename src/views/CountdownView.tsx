@@ -84,8 +84,8 @@ export const CountdownView: React.FC<CountdownViewProps> = ({ now, target, onSki
         </>
       }
     >
-      {/* Logo */}
-      <div className="absolute top-6 left-8 z-20">
+      {/* Logo (inside the title-safe area) */}
+      <div className="absolute z-20" style={{ top: 'var(--safe-y)', left: 'var(--safe-x)' }}>
         <Logo />
       </div>
 

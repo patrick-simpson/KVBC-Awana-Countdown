@@ -26,6 +26,7 @@ export const ShutdownView: React.FC<ShutdownViewProps> = ({ onRestart }) => {
 
   return (
     <ScreenFrame
+      glowColor="#F7941D"
       layers={
         <>
           <AmbientOrbs variant="quiet" />

@@ -117,7 +117,7 @@ export const WeatherScene: React.FC<WeatherSceneProps> = ({ weather }) => {
   // running for months rolls into the new season's effects.
   const season = getSeason();
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 edge-mask">
 
       {/* ── Starfield (always visible, dimmed during heavy weather) ── */}
       <div className="absolute inset-0" style={{
@@ -225,9 +225,14 @@ export const WeatherScene: React.FC<WeatherSceneProps> = ({ weather }) => {
               />
             ))}
           </div>
+          {/* Center-weighted flash — a full-frame flash would print the
+              projector rectangle onto the wall */}
           <div
-            className="absolute inset-0 bg-white"
-            style={{ animation: 'thunderFlash 8s ease-in-out infinite' }}
+            className="absolute inset-0"
+            style={{
+              background: 'radial-gradient(ellipse 70% 55% at 50% 32%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.35) 45%, transparent 75%)',
+              animation: 'thunderFlash 8s ease-in-out infinite',
+            }}
           />
         </>
       )}
