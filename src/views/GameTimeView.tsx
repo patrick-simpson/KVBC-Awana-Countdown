@@ -19,7 +19,7 @@ interface GameTimeViewProps {
 
 /**
  * Per-club game-time screen: catalog waves in the club color(s), the
- * club name as a big audience badge, and a timer to the window's end.
+ * club name as a big badge, and a timer to the window's end.
  * Combined windows (Puggles & Cubbies) get one wave per club.
  */
 export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWindow, endsAt }) => {
@@ -62,11 +62,11 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center gap-7">
-        {/* Club name badges (audience chips like the catalog's AGES tabs) */}
+        {/* Club name badges */}
         <div className="flex gap-4 flex-wrap justify-center">
           {clubs.map((club) => (
             <Badge key={club.id} color={club.color} size="md" sparkle>
-              {club.name} · {club.audience}
+              {club.name}
             </Badge>
           ))}
         </div>
