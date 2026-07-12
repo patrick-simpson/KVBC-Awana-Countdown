@@ -1,0 +1,6 @@
+export enum AppMode {
+  COUNTDOWN = 'COUNTDOWN',
+  SLIDESHOW = 'SLIDESHOW',
+  GAME_TIME = 'GAME_TIME',
+  SHUTDOWN = 'SHUTDOWN',
+}
