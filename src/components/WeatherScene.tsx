@@ -112,9 +112,10 @@ const FIREFLIES = Array.from({ length: 10 }, (_, i) => ({
   y3: -(15 + (i % 3) * 8),
 }));
 
-const season = getSeason();
-
 export const WeatherScene: React.FC<WeatherSceneProps> = ({ weather }) => {
+  // Computed per render (not at module load) so a projector left
+  // running for months rolls into the new season's effects.
+  const season = getSeason();
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
 

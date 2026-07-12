@@ -1,42 +1,98 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { motion } from 'motion/react';
+import { RotateCcw } from 'lucide-react';
+import { ScreenFrame } from '../components/ScreenFrame';
+import { AmbientOrbs } from '../components/AmbientOrbs';
+import { ParticleField } from '../components/ParticleField';
+import { SparkleDoodles } from '../components/SparkleDoodles';
+import { ClubWave } from '../components/ClubWave';
+import { Eyebrow } from '../components/Eyebrow';
+import { GlowText } from '../components/GlowText';
+import { DUR, EASE } from '../lib/motion-tokens';
+import { useKeydown } from '../hooks/useKeydown';
 
 interface ShutdownViewProps {
   onRestart: () => void;
 }
 
+/** End-of-night screen, now at full production value like every other view. */
 export const ShutdownView: React.FC<ShutdownViewProps> = ({ onRestart }) => {
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (['Space', 'Enter', 'ArrowRight', 'PageDown'].includes(e.code)) {
-        e.preventDefault();
-        onRestart();
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [onRestart]);
+  useKeydown((e) => {
+    if (['Space', 'Enter', 'ArrowRight', 'PageDown'].includes(e.code)) {
+      e.preventDefault();
+      onRestart();
+    }
+  });
 
   return (
-    <div
-      className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
-      style={{ background: '#000000' }}
-      onClick={onRestart}
+    <ScreenFrame
+      layers={
+        <>
+          <AmbientOrbs variant="quiet" />
+          <ClubWave color="#F7941D" intensity={0.4} height={26} animate={false} />
+          <ParticleField />
+          <SparkleDoodles seed={9} count={8} />
+        </>
+      }
     >
-      <p className="text-xs font-black uppercase tracking-[0.4em] mb-6 text-shimmer">Awana Night</p>
-      <h1
-        className="text-7xl font-black text-white text-center leading-tight mb-4 animate-pop-in"
-        style={{ textShadow: '0 0 40px rgba(255,255,255,0.4), 0 0 100px rgba(255,255,255,0.15)' }}
+      <div
+        className="flex-1 flex flex-col items-center justify-center cursor-pointer gap-4"
+        onClick={onRestart}
       >
-        See you next week!
-      </h1>
-      <p className="text-slate-500 text-lg tracking-wide animate-slide-up-fade">Have a safe drive home.</p>
-      <button
-        className="mt-16 px-8 py-3 rounded-full border border-white/20 text-white/40 text-sm font-bold uppercase tracking-widest hover:text-white hover:border-white/60 transition-all duration-300"
-        onClick={(e) => { e.stopPropagation(); onRestart(); }}
-      >
-        ↺ Start Over
-      </button>
-      <p className="mt-3 text-slate-700 text-xs uppercase tracking-widest">or press Space</p>
-    </div>
+        <Eyebrow className="mb-2">Awana Night</Eyebrow>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: DUR.slow, ease: EASE.pop }}
+        >
+          <GlowText
+            as="h1"
+            size="h1"
+            font="display"
+            color="#FFFFFF"
+            glow="md"
+            className="text-center leading-tight"
+          >
+            SEE YOU NEXT WEEK!
+          </GlowText>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: DUR.slow, ease: EASE.smooth, delay: 0.4 }}
+        >
+          <GlowText
+            as="p"
+            size="script"
+            font="script"
+            color="#FFB627"
+            glow="sm"
+            style={{ fontWeight: 600 }}
+          >
+            have a safe drive home!
+          </GlowText>
+        </motion.div>
+
+        <button
+          className="mt-14 flex items-center gap-2 px-8 py-3 rounded-full border-2 border-white/20 text-white/40 uppercase hover:text-white hover:border-white/60 transition-all duration-300"
+          style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, letterSpacing: '0.15em' }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRestart();
+          }}
+        >
+          <RotateCcw size={16} strokeWidth={2.5} />
+          Start Over
+        </button>
+        <p
+          className="text-white/25 uppercase text-xs"
+          style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, letterSpacing: '0.2em' }}
+        >
+          or press Space
+        </p>
+      </div>
+    </ScreenFrame>
   );
 };

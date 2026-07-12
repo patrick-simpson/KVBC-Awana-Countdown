@@ -1,8 +1,8 @@
 import React from 'react';
 import { CLUBS, WEDNESDAY_SCHEDULE } from '../config';
-import { stateKey, type ResolvedState } from '../lib/schedule';
-import { stateForWindow } from '../lib/schedule';
+import { stateKey, stateForWindow, type ResolvedState } from '../lib/schedule';
 import type { NavTarget } from '../hooks/useSchedule';
+import { GlassPanel } from '../components/GlassPanel';
 
 interface QuickNavProps {
   state: ResolvedState;
@@ -12,42 +12,42 @@ interface QuickNavProps {
 }
 
 /**
- * Hidden operator menu — appears on hover in the top-right corner.
- * Selecting an entry pins the app to that view until "Resume Schedule".
+ * Hidden operator menu. Its hover zone is only the top-right corner —
+ * the old version keyed off the whole screen, so any mouse nudge
+ * anywhere revealed it.
  */
 export const QuickNav: React.FC<QuickNavProps> = ({ state, isOverride, onSelect, onResume }) => {
   const activeKey = stateKey(state);
   const probe = new Date();
 
   return (
-    <div className="absolute top-4 right-4 z-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2 items-end">
-      <div
-        className="bg-black/50 backdrop-blur-xl border border-white/10 p-2 rounded-2xl flex flex-col gap-1"
-        style={{ boxShadow: '0 0 30px rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.8)' }}
-      >
-        <NavButton
-          label="Main Countdown"
-          active={activeKey === 'countdown'}
-          onClick={() => onSelect({ type: 'countdown' })}
-        />
-        {WEDNESDAY_SCHEDULE.map((window, index) => (
+    <div className="absolute top-0 right-0 z-50 p-4 pl-16 pb-16 group/nav">
+      <div className="opacity-0 group-hover/nav:opacity-100 transition-opacity duration-300">
+        <GlassPanel className="p-2 flex flex-col gap-1">
           <NavButton
-            key={window.title}
-            label={window.title}
-            dotColor={window.kind === 'game' ? CLUBS[window.clubs[0]].color : undefined}
-            active={activeKey === stateKey(stateForWindow(window, probe))}
-            onClick={() => onSelect({ type: 'window', index })}
+            label="Main Countdown"
+            active={activeKey === 'countdown'}
+            onClick={() => onSelect({ type: 'countdown' })}
           />
-        ))}
-        {isOverride && (
-          <button
-            onClick={onResume}
-            className="mt-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-400 hover:bg-emerald-400/10 rounded-lg transition-all border border-emerald-400/20 text-center"
-            style={{ fontFamily: 'var(--font-condensed)', letterSpacing: '0.12em' }}
-          >
-            Resume Schedule
-          </button>
-        )}
+          {WEDNESDAY_SCHEDULE.map((window, index) => (
+            <NavButton
+              key={window.title}
+              label={window.title}
+              dotColor={window.kind === 'game' ? CLUBS[window.clubs[0]].color : undefined}
+              active={activeKey === stateKey(stateForWindow(window, probe))}
+              onClick={() => onSelect({ type: 'window', index })}
+            />
+          ))}
+          {isOverride && (
+            <button
+              onClick={onResume}
+              className="mt-2 px-3 py-1.5 text-xs uppercase text-emerald-400 hover:bg-emerald-400/10 rounded-lg transition-all border border-emerald-400/20 text-center"
+              style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, letterSpacing: '0.12em' }}
+            >
+              Resume Schedule
+            </button>
+          )}
+        </GlassPanel>
       </div>
     </div>
   );
@@ -61,10 +61,10 @@ const NavButton: React.FC<{
 }> = ({ label, active, dotColor, onClick }) => (
   <button
     onClick={onClick}
-    className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all text-right flex items-center justify-end gap-2 ${
+    className={`px-3 py-1.5 text-xs uppercase rounded-lg transition-all text-right flex items-center justify-end gap-2 ${
       active ? 'text-white bg-white/20' : 'text-gray-400 hover:text-white hover:bg-white/10'
     }`}
-    style={{ fontFamily: 'var(--font-condensed)', letterSpacing: '0.12em' }}
+    style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, letterSpacing: '0.12em' }}
   >
     {label}
     {dotColor && (
