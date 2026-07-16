@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { AppMode } from './types';
 import { stateKey, type ResolvedState } from './lib/schedule';
+import { adoptPusherUrlFlags } from './lib/pusher';
 import { DUR, EASE } from './lib/motion-tokens';
 import { useClock } from './hooks/useClock';
 import { useSchedule, type NavTarget } from './hooks/useSchedule';
+import { useBirthdaySync } from './hooks/useBirthdaySync';
 import { ViewErrorBoundary } from './components/ViewErrorBoundary';
+import { ResumePill } from './components/ResumePill';
 import { CountdownView } from './views/CountdownView';
 import { GameTimeView } from './views/GameTimeView';
 import { SlideshowView } from './views/SlideshowView';
@@ -16,7 +19,12 @@ const OPENING_WINDOW_INDEX = 0;
 
 export const App: React.FC = () => {
   const now = useClock();
-  const { state, isOverride, select, resume } = useSchedule(now);
+  const { state, isOverride, resumeAt, select, resume, stay } = useSchedule(now);
+
+  // One-time startup chores: persist ?pusherKey= provisioning, then keep
+  // the live birthday roster synced from the print server's broadcast.
+  useEffect(() => adoptPusherUrlFlags(), []);
+  useBirthdaySync();
 
   return (
     <div className="w-full h-full relative" style={{ background: '#000000' }}>
@@ -35,7 +43,8 @@ export const App: React.FC = () => {
         </motion.div>
       </AnimatePresence>
 
-      <QuickNav state={state} isOverride={isOverride} onSelect={select} onResume={resume} />
+      <QuickNav now={now} state={state} isOverride={isOverride} onSelect={select} onResume={resume} />
+      {isOverride && <ResumePill now={now} resumeAt={resumeAt} onStay={stay} />}
     </div>
   );
 };

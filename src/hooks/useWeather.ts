@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
+import { CHURCH } from '../church.config';
 
 export type WeatherType = 'clear' | 'cloudy' | 'rain' | 'snow' | 'thunder' | 'fog';
 
-const KVBC_LAT = 44.5522;
-const KVBC_LON = -69.6317;
+const { lat: KVBC_LAT, lon: KVBC_LON } = CHURCH.coords;
 const REFRESH_MS = 15 * 60 * 1000;
 
 function getWeatherType(code: number): WeatherType {

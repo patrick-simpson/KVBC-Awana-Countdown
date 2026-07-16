@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CHURCH } from '../church.config';
 
 export interface CalendarEvent {
   date: Date;
@@ -7,8 +8,49 @@ export interface CalendarEvent {
   daysUntil: number;
 }
 
-const CALENDAR_URL = 'https://kvbchurch.twotimtwo.com/site/index';
 const REFRESH_MS = 30 * 60 * 1000;
+const MAX_EVENTS = 6;
+
+/* ── Primary source: the JSON feed the sibling display repo's nightly
+      GitHub Action publishes (validated defensively — any surprise in
+      shape falls through to the direct scrape). ─────────────────────── */
+
+interface FeedEvent {
+  date: string;
+  title: string;
+  isSpecial: boolean;
+  isCancelled: boolean;
+}
+
+function parseFeed(data: unknown): CalendarEvent[] | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const feed = data as Record<string, unknown>;
+  if (feed.version !== 1 || !Array.isArray(feed.events)) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const events: CalendarEvent[] = [];
+
+  for (const item of feed.events) {
+    if (typeof item !== 'object' || item === null) continue;
+    const e = item as Partial<FeedEvent> & Record<string, unknown>;
+    if (typeof e.date !== 'string' || typeof e.title !== 'string') continue;
+    if (e.isCancelled === true) continue; // parity with the scraper's "skipped" rule
+    const date = new Date(`${e.date}T12:00:00`);
+    if (Number.isNaN(date.getTime()) || date < today) continue;
+    const daysUntil = Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const isSpecial =
+      typeof e.isSpecial === 'boolean'
+        ? e.isSpecial
+        : !e.title.toLowerCase().includes('awana meeting');
+    events.push({ date, title: e.title, isSpecial, daysUntil });
+  }
+
+  return events.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, MAX_EVENTS);
+}
+
+/* ── Secondary source: scrape the church calendar HTML directly
+      (CORS-permitting). ─────────────────────────────────────────────── */
 
 /**
  * A span parsed via DOMParser is never attached to the live document,
@@ -57,30 +99,29 @@ function parseCalendarHTML(html: string): CalendarEvent[] {
       events.push({ date, title, isSpecial, daysUntil });
     });
 
-    return events.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 6);
+    return events.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, MAX_EVENTS);
   } catch {
     return [];
   }
 }
 
 async function fetchCalendarEvents(signal: AbortSignal): Promise<CalendarEvent[]> {
+  // Primary: the published JSON feed…
   try {
-    // Direct fetch first…
-    const res = await fetch(CALENDAR_URL, { signal });
-    return parseCalendarHTML(await res.text());
+    const res = await fetch(CHURCH.calendar.feedUrl, { signal });
+    if (res.ok) {
+      const parsed = parseFeed(await res.json());
+      if (parsed && parsed.length > 0) return parsed;
+    }
   } catch (err) {
     if (signal.aborted) throw err;
-    // …then the CORS proxy fallback
-    try {
-      const proxyRes = await fetch(
-        `https://api.allorigins.win/get?url=${encodeURIComponent(CALENDAR_URL)}`,
-        { signal },
-      );
-      const proxyData = await proxyRes.json();
-      return parseCalendarHTML(proxyData.contents);
-    } catch {
-      return [];
-    }
+  }
+  // …secondary: scrape the calendar HTML directly.
+  try {
+    const res = await fetch(CHURCH.calendar.scrapeUrl, { signal });
+    return parseCalendarHTML(await res.text());
+  } catch {
+    return [];
   }
 }
 
