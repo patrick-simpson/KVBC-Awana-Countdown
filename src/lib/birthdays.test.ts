@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
+  LIVE_BIRTHDAY_MAX_AGE_MS,
   birthdaysThisWeek,
   listNames,
+  mergeLiveBirthdays,
   normalizeClub,
   parseBirthdayCSV,
   parseBirthdayDate,
   weekStart,
   type BirthdayEntry,
+  type LiveBirthday,
 } from './birthdays';
 
 const entry = (name: string, month: number, day: number, club: BirthdayEntry['club']): BirthdayEntry => ({
@@ -150,5 +153,39 @@ describe('birthdaysThisWeek', () => {
     expect(birthdaysThisWeek(leapKid, new Date('2028-03-01T18:00:00'))).toHaveLength(1);
     // A random other week matches nothing.
     expect(birthdaysThisWeek(leapKid, new Date('2027-06-09T18:00:00'))).toHaveLength(0);
+  });
+});
+
+describe('mergeLiveBirthdays', () => {
+  const now = new Date('2026-09-16T18:00:00');
+  const live = (
+    name: string,
+    club: LiveBirthday['club'],
+    ageMs = 0,
+    month = 9,
+    day = 16,
+  ): LiveBirthday => ({ name, month, day, club, receivedAt: now.getTime() - ageMs });
+
+  it('appends fresh live entries after the CSV roster', () => {
+    const csv = [entry('Ava Smith', 9, 14, 'sparks')];
+    const merged = mergeLiveBirthdays(csv, [live('Liam', 'tnt')], now);
+    expect(merged.map((e) => e.name)).toEqual(['Ava Smith', 'Liam']);
+  });
+
+  it('CSV wins: drops a live entry matching an existing club + first name', () => {
+    const csv = [entry('Ava Smith', 9, 14, 'sparks')];
+    const merged = mergeLiveBirthdays(csv, [live('ava', 'sparks')], now);
+    expect(merged).toHaveLength(1);
+    // Same first name in a DIFFERENT club is a different kid.
+    expect(mergeLiveBirthdays(csv, [live('Ava', 'tnt')], now)).toHaveLength(2);
+  });
+
+  it('prunes stale live entries and dedupes within the live list', () => {
+    const merged = mergeLiveBirthdays(
+      [],
+      [live('Old Kid', 'cubbies', LIVE_BIRTHDAY_MAX_AGE_MS + 1), live('Noah', 'tnt'), live('noah', 'tnt')],
+      now,
+    );
+    expect(merged.map((e) => e.name)).toEqual(['Noah']);
   });
 });

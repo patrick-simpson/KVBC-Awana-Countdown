@@ -1,16 +1,12 @@
 /**
- * Pure schedule engine — every function is a function of `now` alone.
- * No memoized dates, no module state: callers re-evaluate each tick,
- * so the app can never hold a stale target or fight its own scheduler.
+ * Pure schedule engine — every function is a function of `now` (and an
+ * explicit config, defaulting to the shared one). No memoized dates, no
+ * module state: callers re-evaluate each tick, so the app can never
+ * hold a stale target or fight its own scheduler.
  */
 import { AppMode } from '../types';
-import {
-  MEETING_DAY,
-  MEETING_START,
-  WEDNESDAY_SCHEDULE,
-  type DeckId,
-  type ScheduleWindow,
-} from '../config';
+import { SCHEDULE_CONFIG, localDateKey } from './shared-config';
+import type { DeckId, ScheduleConfig, ScheduleWindow } from '../config';
 
 export type ResolvedState =
   | { mode: AppMode.COUNTDOWN; target: Date }
@@ -20,11 +16,24 @@ export type ResolvedState =
 
 const minutesOfDay = (d: Date) => d.getHours() * 60 + d.getMinutes();
 
-/** The schedule only applies on meeting day; every other moment is COUNTDOWN. */
-export function findWindow(now: Date): ScheduleWindow | null {
-  if (now.getDay() !== MEETING_DAY) return null;
+/**
+ * The window table in effect on `now`'s calendar date, or null when no
+ * meeting runs that date. A dated special entry wins over the weekday
+ * rule: `noClub` cancels the night, a replacement table reshapes it
+ * (and applies even on a non-meeting weekday).
+ */
+export function windowsForDate(now: Date, cfg: ScheduleConfig = SCHEDULE_CONFIG): ScheduleWindow[] | null {
+  const special = cfg.specialDates[localDateKey(now)];
+  if (special) return special.noClub === true ? null : special.windows;
+  return now.getDay() === cfg.meetingDay ? cfg.windows : null;
+}
+
+/** The schedule only applies on meeting dates; every other moment is COUNTDOWN. */
+export function findWindow(now: Date, cfg: ScheduleConfig = SCHEDULE_CONFIG): ScheduleWindow | null {
+  const windows = windowsForDate(now, cfg);
+  if (!windows) return null;
   const mins = minutesOfDay(now);
-  return WEDNESDAY_SCHEDULE.find((w) => mins >= w.startMin && mins < w.endMin) ?? null;
+  return windows.find((w) => mins >= w.startMin && mins < w.endMin) ?? null;
 }
 
 /** A window's end as a Date anchored to `now`'s own calendar day. */
@@ -35,17 +44,25 @@ export function windowEnd(window: ScheduleWindow, now: Date): Date {
 }
 
 /**
- * Next Wednesday 6:00 PM, local wall clock. Pure date-part arithmetic
- * (setHours/setDate), so DST transitions and month/year rollovers keep
- * the meeting at 18:00 local. At exactly 18:00 Wednesday the answer is
- * next week's meeting — the schedule window owns the current moment.
+ * Next meeting (Wednesday 6:00 PM), local wall clock. Pure date-part
+ * arithmetic (setHours/setDate), so DST transitions and month/year
+ * rollovers keep the meeting at 18:00 local. At exactly 18:00 Wednesday
+ * the answer is next week's meeting — the schedule window owns the
+ * current moment. Weeks cancelled via `specialDates[...].noClub` are
+ * skipped (bounded walk, ~one year).
  */
-export function getNextMeeting(now: Date): Date {
+export function getNextMeeting(now: Date, cfg: ScheduleConfig = SCHEDULE_CONFIG): Date {
   const target = new Date(now);
-  target.setHours(MEETING_START.hour, MEETING_START.minute, 0, 0);
-  let daysUntil = (MEETING_DAY - now.getDay() + 7) % 7;
+  target.setHours(cfg.meetingStart.hour, cfg.meetingStart.minute, 0, 0);
+  let daysUntil = (cfg.meetingDay - now.getDay() + 7) % 7;
   if (daysUntil === 0 && target.getTime() <= now.getTime()) daysUntil = 7;
   target.setDate(now.getDate() + daysUntil);
+
+  for (let i = 0; i < 53; i++) {
+    const special = cfg.specialDates[localDateKey(target)];
+    if (!special || special.noClub !== true) return target;
+    target.setDate(target.getDate() + 7);
+  }
   return target;
 }
 
@@ -60,9 +77,9 @@ export function stateForWindow(window: ScheduleWindow, now: Date): ResolvedState
   }
 }
 
-export function resolveState(now: Date): ResolvedState {
-  const window = findWindow(now);
-  if (!window) return { mode: AppMode.COUNTDOWN, target: getNextMeeting(now) };
+export function resolveState(now: Date, cfg: ScheduleConfig = SCHEDULE_CONFIG): ResolvedState {
+  const window = findWindow(now, cfg);
+  if (!window) return { mode: AppMode.COUNTDOWN, target: getNextMeeting(now, cfg) };
   return stateForWindow(window, now);
 }
 

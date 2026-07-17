@@ -1,9 +1,21 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { AppMode } from '../types';
-import { findWindow, getNextMeeting, resolveState, secondsUntil, windowEnd } from './schedule';
+import {
+  findWindow,
+  getNextMeeting,
+  resolveState,
+  secondsUntil,
+  windowEnd,
+  windowsForDate,
+} from './schedule';
+import { SCHEDULE_CONFIG, localDateKey, type ScheduleConfig } from './shared-config';
+
+// KVBC is in Maine; schedule math must hold across US DST transitions.
+// Set at module scope (not just beforeAll) because some suites below
+// construct their fixture dates while the file is being collected.
+process.env.TZ = 'America/New_York';
 
 beforeAll(() => {
-  // KVBC is in Maine; schedule math must hold across US DST transitions.
   process.env.TZ = 'America/New_York';
 });
 
@@ -160,5 +172,101 @@ describe('windowEnd / secondsUntil', () => {
     const now = wedAt(18, 0, 0);
     const past = wedAt(17, 0, 0);
     expect(secondsUntil(past, now)).toBe(0);
+  });
+});
+
+/* ── Dated overrides / cancelled nights (shared/schedule.json specialDates) ── */
+
+/** Synthetic config: normal Wednesdays, one noClub week, one shifted night. */
+function configWith(specialDates: ScheduleConfig['specialDates']): ScheduleConfig {
+  return { ...SCHEDULE_CONFIG, specialDates };
+}
+
+describe('specialDates — noClub', () => {
+  const wed = wedAt(18, 10, 0);
+  const cfg = configWith({ [localDateKey(wed)]: { noClub: true, label: 'Spring Break' } });
+
+  it('resolves COUNTDOWN all evening on a cancelled Wednesday', () => {
+    expect(windowsForDate(wed, cfg)).toBeNull();
+    for (const [h, m] of [[17, 0], [18, 0], [18, 10], [19, 32], [21, 0]] as const) {
+      const at = new Date(wed);
+      at.setHours(h, m, 0, 0);
+      expect(resolveState(at, cfg).mode).toBe(AppMode.COUNTDOWN);
+    }
+  });
+
+  it('getNextMeeting skips the cancelled week to the following Wednesday', () => {
+    const monday = new Date(wed);
+    monday.setDate(monday.getDate() - 2);
+    monday.setHours(12, 0, 0, 0);
+    const target = getNextMeeting(monday, cfg);
+    expect(target.getDay()).toBe(3);
+    expect(target.getTime() - wed.getTime()).toBeGreaterThan(6 * 24 * 3600 * 1000);
+  });
+
+  it('counts down to next week even during the cancelled evening itself', () => {
+    const state = resolveState(wed, cfg);
+    if (state.mode !== AppMode.COUNTDOWN) throw new Error('expected countdown');
+    expect(state.target.getTime()).toBeGreaterThan(wed.getTime());
+    expect(localDateKey(state.target)).not.toBe(localDateKey(wed));
+  });
+
+  it('leaves other Wednesdays untouched', () => {
+    const nextWed = new Date(wed);
+    nextWed.setDate(nextWed.getDate() + 7);
+    expect(resolveState(nextWed, cfg).mode).toBe(AppMode.GAME_TIME);
+  });
+});
+
+describe('specialDates — replacement window table', () => {
+  const wed = wedAt(19, 20, 0);
+  // Store Night: everything shifts 15 minutes earlier at the tail.
+  const cfg = configWith({
+    [localDateKey(wed)]: {
+      label: 'Store Night',
+      windows: [
+        { kind: 'slideshow', deck: 'opening', title: 'Opening Ceremony', startMin: 18 * 60, endMin: 18 * 60 + 5 },
+        { kind: 'game', clubs: ['tnt'], title: 'T&T Game Time', startMin: 18 * 60 + 5, endMin: 18 * 60 + 30 },
+        { kind: 'slideshow', deck: 'closing', title: 'Closing', startMin: 19 * 60, endMin: 19 * 60 + 15 },
+        { kind: 'shutdown', title: 'Shutdown', startMin: 19 * 60 + 15, endMin: 24 * 60 },
+      ],
+    },
+  });
+
+  it('applies the replacement table on the special date', () => {
+    const closing = new Date(wed);
+    closing.setHours(19, 5, 0, 0);
+    const state = resolveState(closing, cfg);
+    expect(state.mode).toBe(AppMode.SLIDESHOW);
+    expect(state.mode === AppMode.SLIDESHOW && state.deck).toBe('closing');
+    // 19:20 is SHUTDOWN on the special night (normal nights: game time).
+    expect(resolveState(wed, cfg).mode).toBe(AppMode.SHUTDOWN);
+  });
+
+  it('does not leak onto normal Wednesdays', () => {
+    const nextWed = new Date(wed);
+    nextWed.setDate(nextWed.getDate() + 7);
+    expect(resolveState(nextWed, cfg).mode).toBe(AppMode.GAME_TIME);
+  });
+
+  it('gaps in a replacement table resolve to COUNTDOWN (never crash)', () => {
+    const gap = new Date(wed);
+    gap.setHours(18, 45, 0, 0); // between T&T end (18:30) and closing (19:00)
+    expect(resolveState(gap, cfg).mode).toBe(AppMode.COUNTDOWN);
+  });
+
+  it('applies a replacement table even on a non-meeting weekday', () => {
+    const friday = new Date(wed);
+    friday.setDate(friday.getDate() + 2);
+    expect(friday.getDay()).not.toBe(3);
+    const fridayCfg = configWith({
+      [localDateKey(friday)]: {
+        label: 'Awards Night',
+        windows: [{ kind: 'shutdown', title: 'Shutdown', startMin: 18 * 60, endMin: 24 * 60 }],
+      },
+    });
+    const at = new Date(friday);
+    at.setHours(19, 0, 0, 0);
+    expect(resolveState(at, fridayCfg).mode).toBe(AppMode.SHUTDOWN);
   });
 });

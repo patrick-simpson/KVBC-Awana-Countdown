@@ -1,5 +1,8 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import type { SlideDef } from '../config';
+import type { CalendarEvent } from '../hooks/useCalendarEvents';
+import { DUR, EASE } from '../lib/motion-tokens';
 import { ScreenFrame } from '../components/ScreenFrame';
 import { AmbientOrbs } from '../components/AmbientOrbs';
 import { ParticleField } from '../components/ParticleField';
@@ -14,6 +17,7 @@ import { rgbTriple } from '../lib/color';
 interface SlideProps {
   slide: SlideDef;
   now: Date;
+  events?: CalendarEvent[];
   onNext?: () => void;
 }
 
@@ -21,7 +25,7 @@ interface SlideProps {
  * One slide, laid out by its explicit `layout` field (the old version
  * guessed from slide id and body length).
  */
-export const Slide: React.FC<SlideProps> = ({ slide, now, onNext }) => {
+export const Slide: React.FC<SlideProps> = ({ slide, now, events, onNext }) => {
   const timeString = now.toLocaleTimeString([], {
     hour: 'numeric',
     minute: '2-digit',
@@ -66,7 +70,7 @@ export const Slide: React.FC<SlideProps> = ({ slide, now, onNext }) => {
 
       {/* Body */}
       <div className="flex-1 flex flex-col items-center justify-center px-16 pb-10 min-h-0">
-        <SlideBody slide={slide} />
+        <SlideBody slide={slide} events={events} />
       </div>
 
       {slide.layout === 'celebration' && <ConfettiBurst />}
@@ -83,7 +87,7 @@ export const Slide: React.FC<SlideProps> = ({ slide, now, onNext }) => {
   );
 };
 
-const SlideBody: React.FC<{ slide: SlideDef }> = ({ slide }) => {
+const SlideBody: React.FC<{ slide: SlideDef; events?: CalendarEvent[] }> = ({ slide, events }) => {
   switch (slide.layout) {
     case 'celebration':
       return (
@@ -130,7 +134,45 @@ const SlideBody: React.FC<{ slide: SlideDef }> = ({ slide }) => {
           {slide.body && <ScriptLine text={slide.body} color="#FFC107" />}
         </>
       );
+
+    case 'coming-up':
+      return (
+        <>
+          <GlowHeadline text={slide.title} gradient="amber" size="h1" />
+          <ComingUpList events={events ?? []} />
+        </>
+      );
   }
+};
+
+/** Upcoming calendar events for the closing "Coming up" slide. */
+const COMING_UP_COLORS = ['#FFC107', '#E8192C', '#0072CE', '#00A651', '#F7941D'];
+
+const ComingUpList: React.FC<{ events: CalendarEvent[] }> = ({ events }) => {
+  const upcoming = events.slice(0, 5);
+  if (upcoming.length === 0) {
+    return <ScriptLine text="See you next week!" color="#FFC107" />;
+  }
+  return (
+    <div className="mt-10 flex flex-col items-center gap-4">
+      {upcoming.map((event, idx) => (
+        <motion.div
+          key={`${event.title}-${event.daysUntil}`}
+          initial={{ opacity: 0, x: idx % 2 === 0 ? -24 : 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: DUR.base, ease: EASE.smooth, delay: 0.15 + idx * 0.12 }}
+        >
+          <Badge color={COMING_UP_COLORS[idx % COMING_UP_COLORS.length]} size="md" sparkle={event.isSpecial}>
+            <span style={{ letterSpacing: 0 }}>{event.isSpecial ? '⭐' : '📅'}</span>
+            {event.title}
+            <span className="opacity-70">
+              · {event.date.toLocaleDateString([], { month: 'short', day: 'numeric' })}
+            </span>
+          </Badge>
+        </motion.div>
+      ))}
+    </div>
+  );
 };
 
 /** Display headline with the blurred glow layer behind gradient text. */

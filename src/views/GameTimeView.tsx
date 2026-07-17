@@ -1,6 +1,7 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { CLUBS, type ScheduleWindow } from '../config';
+import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { CLUBS, type Club, type ScheduleWindow } from '../config';
+import { THEME, artUrl } from '../lib/shared-config';
 import { ScreenFrame } from '../components/ScreenFrame';
 import { AmbientOrbs } from '../components/AmbientOrbs';
 import { ParticleField } from '../components/ParticleField';
@@ -13,8 +14,11 @@ import { BigTimer } from '../components/BigTimer';
 import { GlowText } from '../components/GlowText';
 import { secondsUntil } from '../lib/schedule';
 import { birthdaysThisWeek, listNames } from '../lib/birthdays';
+import { countForClub } from '../lib/tally';
+import { mulberry32 } from '../lib/color';
 import { DUR, EASE } from '../lib/motion-tokens';
 import { useBirthdays } from '../hooks/useBirthdays';
+import { useTally } from '../hooks/useTally';
 
 interface GameTimeViewProps {
   now: Date;
@@ -22,9 +26,15 @@ interface GameTimeViewProps {
   endsAt: Date;
 }
 
+/** Tally older than this is treated as gone (print server offline). */
+const TALLY_STALE_MS = 10 * 60 * 1000;
+
 /**
  * Per-club game-time screen: catalog waves in the club color(s), the
- * club name as a big badge, and a timer to the window's end.
+ * club emblem (official logo art when available, typographic badge
+ * otherwise), a timer to the window's end, official character art in
+ * the lower corners, and a subtle live "checked in" count per club fed
+ * by the print server's tally broadcast.
  * Combined windows (Puggles & Cubbies) get one wave per club.
  */
 export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWindow, endsAt }) => {
@@ -35,6 +45,14 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
   // This week's (Sun–Sat) birthdays for the club(s) on screen.
   const roster = useBirthdays();
   const celebrants = birthdaysThisWeek(roster, now).filter((b) => gameWindow.clubs.includes(b.club));
+
+  // Live check-in tally (hidden when absent or stale — judged against
+  // the ticking clock so it self-hides if the print server goes quiet).
+  const tally = useTally();
+  const tallyFresh = tally !== null && now.getTime() - tally.at.getTime() < TALLY_STALE_MS;
+  const clubCounts = clubs
+    .map((club) => ({ club, count: tallyFresh ? countForClub(tally, club.id) : null }))
+    .filter((c): c is { club: Club; count: number } => c.count !== null);
 
   const seconds = secondsUntil(endsAt, now);
   const endTimeStr = endsAt.toLocaleTimeString([], {
@@ -63,6 +81,7 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
             colors={[...clubs.map((c) => c.color), '#FFFFFF', '#FFC107']}
             count={16}
           />
+          <CharacterArt clubs={clubs} seed={gameWindow.startMin} />
         </>
       }
     >
@@ -71,12 +90,10 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center gap-7">
-        {/* Club name badges */}
-        <div className="flex gap-4 flex-wrap justify-center">
+        {/* Club emblems — official art when we have it, badge otherwise */}
+        <div className="flex gap-6 flex-wrap justify-center items-center">
           {clubs.map((club) => (
-            <Badge key={club.id} color={club.color} size="md" sparkle>
-              {club.name}
-            </Badge>
+            <ClubEmblem key={club.id} club={club} />
           ))}
         </div>
 
@@ -104,6 +121,26 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
         >
           Game ends at {endTimeStr}
         </GlowText>
+
+        {/* Subtle live check-in counts (print server tally broadcast) */}
+        <AnimatePresence>
+          {clubCounts.length > 0 && (
+            <motion.div
+              className="flex gap-3 justify-center"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: DUR.base, ease: EASE.pop, delay: 0.4 }}
+            >
+              {clubCounts.map(({ club, count }) => (
+                <Badge key={club.id} color={club.color} size="sm" style={{ opacity: 0.85 }}>
+                  {clubCounts.length > 1 ? `${club.name}: ` : ''}
+                  {count} checked in
+                </Badge>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* This week's birthdays for the club(s) on screen */}
         {celebrants.length > 0 && (
@@ -139,5 +176,88 @@ export const GameTimeView: React.FC<GameTimeViewProps> = ({ now, window: gameWin
 
       {celebrants.length > 0 && <ConfettiBurst />}
     </ScreenFrame>
+  );
+};
+
+/**
+ * The club's official logo art (from shared/theme.json), glowing in the
+ * club color; a failed load falls back to the typographic badge so a
+ * missing PNG can never blank the screen.
+ */
+const ClubEmblem: React.FC<{ club: Club }> = ({ club }) => {
+  const [failed, setFailed] = useState(false);
+  const logo = THEME.clubs[club.id]?.art.logo;
+
+  if (!logo || failed) {
+    return (
+      <Badge color={club.color} size="md" sparkle>
+        {club.name}
+      </Badge>
+    );
+  }
+  return (
+    <motion.img
+      src={artUrl(logo)}
+      alt={club.name}
+      onError={() => setFailed(true)}
+      draggable={false}
+      className="select-none"
+      style={{
+        height: 'clamp(4rem, 11vh, 9rem)',
+        width: 'auto',
+        filter: `drop-shadow(0 0 1px rgba(255,255,255,0.9)) drop-shadow(0 0 14px rgba(255,255,255,0.35)) drop-shadow(0 0 26px ${club.color}90)`,
+      }}
+      initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+      transition={{ duration: DUR.base, ease: EASE.pop }}
+    />
+  );
+};
+
+/**
+ * Official club character art in the lower corners — one per side,
+ * seed-picked (stable per window) from the characters the theme ships.
+ * Decorative layer only; sits with the waves behind the content.
+ */
+const CharacterArt: React.FC<{ clubs: Club[]; seed: number }> = ({ clubs, seed }) => {
+  const pool = clubs.flatMap(
+    (club) => THEME.clubs[club.id]?.art.characters?.map((path) => ({ club, path })) ?? [],
+  );
+  if (pool.length === 0) return null;
+
+  const rand = mulberry32(seed);
+  const first = pool[Math.floor(rand() * pool.length)];
+  const rest = pool.filter((c) => c !== first);
+  const second = rest.length > 0 ? rest[Math.floor(rand() * rest.length)] : null;
+
+  const corners = [
+    { char: first, className: 'left-[3%]', rotate: -6, x: -40 },
+    ...(second ? [{ char: second, className: 'right-[3%]', rotate: 6, x: 40 }] : []),
+  ];
+
+  return (
+    <>
+      {corners.map(({ char, className, rotate, x }) => (
+        <motion.img
+          key={char.path}
+          src={artUrl(char.path)}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className={`absolute bottom-[4%] ${className} select-none pointer-events-none`}
+          style={{
+            height: 'clamp(9rem, 26vh, 20rem)',
+            width: 'auto',
+            filter: 'drop-shadow(0 6px 18px rgba(0,0,0,0.55))',
+          }}
+          initial={{ opacity: 0, y: 60, x, rotate: 0 }}
+          animate={{ opacity: 0.95, y: 0, x: 0, rotate }}
+          transition={{ duration: DUR.slow, ease: EASE.pop, delay: 0.5 }}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = 'none';
+          }}
+        />
+      ))}
+    </>
   );
 };

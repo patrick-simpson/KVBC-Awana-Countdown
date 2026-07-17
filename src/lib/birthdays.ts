@@ -155,6 +155,53 @@ export function listNames(names: string[]): string {
   return `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`;
 }
 
+/* ── Live (Pusher-synced) birthdays ───────────────────────────────── */
+
+/**
+ * A birthday learned from the print server's `birthdays` broadcast
+ * (first names only — the privacy contract never puts last names on
+ * the channel). Stamped with receipt time so stale entries age out.
+ */
+export interface LiveBirthday {
+  name: string;
+  /** 1–12 */
+  month: number;
+  /** 1–31 */
+  day: number;
+  club: ClubId;
+  /** Epoch ms when this entry was received. */
+  receivedAt: number;
+}
+
+/** Live entries older than this are pruned (a bit over a week). */
+export const LIVE_BIRTHDAY_MAX_AGE_MS = 8 * 24 * 60 * 60 * 1000;
+
+const firstToken = (name: string) => name.trim().split(/\s+/)[0]?.toLowerCase() ?? '';
+
+/**
+ * Merge the operator-uploaded CSV roster with live broadcast entries.
+ * The CSV is authoritative: a live entry is dropped when the CSV
+ * already has someone in the same club whose first name matches
+ * (live entries only ever carry first names). Stale and duplicate
+ * live entries are pruned. Pure — storage lives in hooks/useBirthdays.
+ */
+export function mergeLiveBirthdays(
+  csv: BirthdayEntry[],
+  live: LiveBirthday[],
+  now: Date,
+): BirthdayEntry[] {
+  const seen = new Set(csv.map((e) => `${e.club}|${firstToken(e.name)}`));
+  const merged = [...csv];
+  for (const l of live) {
+    if (now.getTime() - l.receivedAt > LIVE_BIRTHDAY_MAX_AGE_MS) continue;
+    const key = `${l.club}|${firstToken(l.name)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push({ name: l.name, month: l.month, day: l.day, club: l.club });
+  }
+  return merged;
+}
+
 /* ── Week matching ────────────────────────────────────────────────── */
 
 /** Sunday (local midnight) of the week containing `date`. */

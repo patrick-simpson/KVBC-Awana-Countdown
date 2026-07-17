@@ -1,29 +1,28 @@
 /**
  * Club, schedule, and slide configuration.
  * All times are local wall-clock; the meeting runs Wednesday evenings.
+ *
+ * The clubs and schedule windows are DERIVED from the shared data files
+ * this repo hosts for the whole Awana app family (shared/schedule.json,
+ * shared/theme.json — validated in src/lib/shared-config.ts). Slide
+ * decks and pledge text remain here as defaults.
  */
+import { SCHEDULE_CONFIG, THEME } from './lib/shared-config';
+import type { Club, ClubId, DeckId, ScheduleWindow } from './lib/shared-config';
 
-/* ── Clubs (colors follow the 2026–27 Awana catalog) ─────────────── */
+export type { Club, ClubId, DeckId, ScheduleWindow, ScheduleConfig } from './lib/shared-config';
 
-export type ClubId = 'puggles' | 'cubbies' | 'sparks' | 'tnt';
+/* ── Clubs (colors follow the 2026–27 Awana catalog via theme.json) ── */
 
-export interface Club {
-  id: ClubId;
-  name: string;
-  color: string;
-}
+const CLUB_IDS: readonly ClubId[] = ['puggles', 'cubbies', 'sparks', 'tnt'];
 
-export const CLUBS: Record<ClubId, Club> = {
-  puggles: { id: 'puggles', name: 'Puggles', color: '#F7941D' },
-  cubbies: { id: 'cubbies', name: 'Cubbies', color: '#0072CE' },
-  sparks: { id: 'sparks', name: 'Sparks', color: '#E8192C' },
-  tnt: { id: 'tnt', name: 'T&T', color: '#00A651' },
-};
+export const CLUBS: Record<ClubId, Club> = Object.fromEntries(
+  CLUB_IDS.map((id) => [id, { id, name: THEME.clubs[id].name, color: THEME.clubs[id].color }]),
+) as Record<ClubId, Club>;
 
 /* ── Slides ───────────────────────────────────────────────────────── */
 
-export type SlideLayout = 'celebration' | 'welcome' | 'pledge' | 'closing';
-export type DeckId = 'opening' | 'closing';
+export type SlideLayout = 'celebration' | 'welcome' | 'pledge' | 'closing' | 'coming-up';
 
 export interface SlideDef {
   id: string;
@@ -54,7 +53,7 @@ export const DECKS: Record<DeckId, SlideDef[]> = {
       layout: 'pledge',
       title: 'Pledge of Allegiance',
       body: US_PLEDGE_TEXT,
-      accentColor: '#E8192C',
+      accentColor: CLUBS.sparks.color,
       showClock: true,
     },
     {
@@ -62,7 +61,7 @@ export const DECKS: Record<DeckId, SlideDef[]> = {
       layout: 'pledge',
       title: 'Awana Pledge',
       body: AWANA_PLEDGE_TEXT,
-      accentColor: '#0072CE',
+      accentColor: CLUBS.cubbies.color,
       showClock: true,
     },
   ],
@@ -76,37 +75,15 @@ export const DECKS: Record<DeckId, SlideDef[]> = {
   ],
 };
 
-/* ── Wednesday schedule ───────────────────────────────────────────── */
+/* ── Wednesday schedule (from shared/schedule.json) ───────────────── */
 
-export const MEETING_DAY = 3; // Wednesday
-export const MEETING_START = { hour: 18, minute: 0 }; // 6:00 PM
-
-interface WindowBase {
-  title: string;
-  /** Inclusive start, minutes from local midnight. */
-  startMin: number;
-  /** Exclusive end, minutes from local midnight. */
-  endMin: number;
-}
-
-export type ScheduleWindow =
-  | (WindowBase & { kind: 'slideshow'; deck: DeckId })
-  | (WindowBase & { kind: 'game'; clubs: ClubId[] })
-  | (WindowBase & { kind: 'shutdown' });
-
-const MIN = (hour: number, minute: number) => hour * 60 + minute;
+export const MEETING_DAY = SCHEDULE_CONFIG.meetingDay;
+export const MEETING_START = SCHEDULE_CONFIG.meetingStart;
 
 /**
- * The full Wednesday evening, gap-free from 18:00 to midnight.
+ * The full meeting evening, gap-free from 18:00 to midnight.
  * The 18:00–18:05 opening window is what lets a real countdown
  * completion hold the welcome/pledge ceremony instead of being
  * yanked back to a 7-day countdown.
  */
-export const WEDNESDAY_SCHEDULE: ScheduleWindow[] = [
-  { kind: 'slideshow', deck: 'opening', title: 'Opening Ceremony', startMin: MIN(18, 0), endMin: MIN(18, 5) },
-  { kind: 'game', title: 'T&T Game Time', clubs: ['tnt'], startMin: MIN(18, 5), endMin: MIN(18, 30) },
-  { kind: 'game', title: 'Sparks Game Time', clubs: ['sparks'], startMin: MIN(18, 30), endMin: MIN(19, 0) },
-  { kind: 'game', title: 'Puggles & Cubbies Game Time', clubs: ['cubbies', 'puggles'], startMin: MIN(19, 0), endMin: MIN(19, 30) },
-  { kind: 'slideshow', deck: 'closing', title: 'Closing', startMin: MIN(19, 30), endMin: MIN(19, 35) },
-  { kind: 'shutdown', title: 'Shutdown', startMin: MIN(19, 35), endMin: MIN(24, 0) },
-];
+export const WEDNESDAY_SCHEDULE: ScheduleWindow[] = SCHEDULE_CONFIG.windows;
