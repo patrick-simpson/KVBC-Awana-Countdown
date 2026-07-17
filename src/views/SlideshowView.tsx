@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { DECKS, type DeckId } from '../config';
+import { DECKS, type DeckId, type SlideDef } from '../config';
+import { CHURCH } from '../church.config';
+import { useCalendarEvents } from '../hooks/useCalendarEvents';
 import { DUR, EASE } from '../lib/motion-tokens';
 import { useKeydown } from '../hooks/useKeydown';
 import { Badge } from '../components/Badge';
@@ -28,7 +30,21 @@ const flipVariants = {
  * mid-transition.
  */
 export const SlideshowView: React.FC<SlideshowViewProps> = ({ deck, now, onExit }) => {
-  const slides = DECKS[deck];
+  // "Coming up at KVBC": when the calendar knows about upcoming events,
+  // the closing deck gains a slide announcing them before "goodnight" —
+  // parents in the room at pickup are exactly the audience for it.
+  const events = useCalendarEvents();
+  const slides = useMemo<SlideDef[]>(() => {
+    const base = DECKS[deck];
+    if (deck !== 'closing' || events.length === 0) return base;
+    const comingUp: SlideDef = {
+      id: 'coming-up',
+      layout: 'coming-up',
+      title: `Coming up at ${CHURCH.name}`,
+      duration: 20,
+    };
+    return [comingUp, ...base];
+  }, [deck, events]);
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<Direction>(1);
   const [escArmed, setEscArmed] = useState(false);
@@ -85,7 +101,7 @@ export const SlideshowView: React.FC<SlideshowViewProps> = ({ deck, now, onExit 
           transition={{ duration: DUR.slow, ease: EASE.smooth }}
           style={{ transformStyle: 'preserve-3d', backfaceVisibility: 'hidden' }}
         >
-          <Slide slide={slide} now={now} onNext={index < slides.length - 1 ? goNext : undefined} />
+          <Slide slide={slide} now={now} events={events} onNext={index < slides.length - 1 ? goNext : undefined} />
         </motion.div>
       </AnimatePresence>
 

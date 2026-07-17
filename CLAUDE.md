@@ -156,6 +156,8 @@ These rules are mandatory. Every change must satisfy all three:
 ## Important Notes for AI Assistants
 
 - There is no committed Awana logo image; `Logo.tsx` is a typographic lockup. If an official PNG is added to `public/`, upgrade Logo to use it.
+- This repo hosts `shared/` (schedule.json + theme.json + art) for the whole Awana app family — the display and printer repos fetch it from this repo's Pages site. Changing those files changes the sibling apps too; `src/lib/shared-config.ts` validates them at build time. Event-bus payloads are pinned by `src/lib/__fixtures__/contract-vectors.json` (mirror; canonical copy lives in Print-TwoTimTwo-Labels).
+- Fork guide for other churches: see "Forking for another church" in README.md (`src/church.config.ts` + `shared/` are the only per-church surfaces).
 - The schedule engine is the highest-risk code — any change to `src/lib/schedule.ts` or `src/config.ts` windows needs matching cases in `schedule.test.ts`.
 - Verify changes with `npm run lint`, `npm test`, and time-travel QA (`?now=`) across the 18:00, 18:05, 19:30, 19:35, and midnight boundaries, plus a non-Wednesday evening.
 - The app targets a single always-on display; hover menus and keyboard shortcuts are intentional operator controls.

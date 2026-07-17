@@ -22,7 +22,7 @@ export const CLUBS: Record<ClubId, Club> = Object.fromEntries(
 
 /* ── Slides ───────────────────────────────────────────────────────── */
 
-export type SlideLayout = 'celebration' | 'welcome' | 'pledge' | 'closing';
+export type SlideLayout = 'celebration' | 'welcome' | 'pledge' | 'closing' | 'coming-up';
 
 export interface SlideDef {
   id: string;

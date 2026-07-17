@@ -5,6 +5,8 @@ import { stateKey, stateForWindow, windowsForDate, type ResolvedState } from '..
 import { parseBirthdayCSV } from '../lib/birthdays';
 import type { NavTarget } from '../hooks/useSchedule';
 import { clearBirthdays, saveBirthdays, useBirthdayRoster } from '../hooks/useBirthdays';
+import { getStoredPusherCreds, savePusherCreds } from '../lib/pusher';
+import { CHURCH } from '../church.config';
 import { GlassPanel } from '../components/GlassPanel';
 
 interface QuickNavProps {
@@ -54,6 +56,7 @@ export const QuickNav: React.FC<QuickNavProps> = ({ now, state, isOverride, onSe
             </button>
           )}
           <BirthdayUpload />
+          <DisplaySettings />
         </GlassPanel>
       </div>
     </div>
@@ -136,6 +139,76 @@ const BirthdayUpload: React.FC = () => {
         >
           {notice.text}
         </p>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Display settings (#42): the live-data connection, editable on the
+ * display machine itself instead of via URL flags. The Pusher key is
+ * the PUBLIC subscribe-only key (the print server holds the secret);
+ * changes apply on the next page load — the pipeline binds once.
+ */
+const DisplaySettings: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const stored = getStoredPusherCreds();
+  const [key, setKey] = useState(stored?.key ?? CHURCH.pusher.key);
+  const [cluster, setCluster] = useState(stored?.cluster ?? CHURCH.pusher.cluster);
+  const [saved, setSaved] = useState(false);
+
+  const save = () => {
+    savePusherCreds(key, cluster);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 4000);
+  };
+
+  const inputStyle =
+    'px-2 py-1 text-xs rounded bg-white/10 border border-white/15 text-white placeholder-gray-500 outline-none focus:border-white/40 w-40';
+
+  return (
+    <div
+      className="mt-2 pt-2 border-t border-white/10 flex flex-col gap-1.5"
+      style={{ fontFamily: 'var(--font-condensed)', letterSpacing: '0.12em' }}
+    >
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="px-3 py-1.5 text-xs uppercase text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all text-right flex items-center justify-end gap-2"
+        style={{ fontWeight: 700 }}
+      >
+        Display Settings
+        <span style={{ letterSpacing: 0 }}>{open ? '▴' : '⚙️'}</span>
+      </button>
+      {open && (
+        <div className="px-3 pb-1 flex flex-col items-end gap-1.5">
+          <label className="text-[0.6rem] uppercase text-gray-500" style={{ fontWeight: 700 }}>
+            Live data key (Pusher, public)
+          </label>
+          <input
+            className={inputStyle}
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            placeholder="public key — blank = off"
+            spellCheck={false}
+          />
+          <input
+            className={inputStyle}
+            value={cluster}
+            onChange={(e) => setCluster(e.target.value)}
+            placeholder="cluster (us2)"
+            spellCheck={false}
+          />
+          <button
+            onClick={save}
+            className="px-3 py-1 text-xs uppercase text-emerald-400 hover:bg-emerald-400/10 rounded-lg transition-all border border-emerald-400/20"
+            style={{ fontWeight: 800 }}
+          >
+            Save
+          </button>
+          <p className="text-[0.6rem] uppercase text-gray-500 text-right" style={{ fontWeight: 700 }}>
+            {saved ? 'Saved — reload the page to apply' : 'Powers live counts + birthday sync'}
+          </p>
+        </div>
       )}
     </div>
   );

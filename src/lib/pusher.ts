@@ -33,6 +33,29 @@ function storedCreds(): Creds | null {
   }
 }
 
+/** Current stored creds for the settings UI (null = using church.config/none). */
+export function getStoredPusherCreds(): { key: string; cluster: string } | null {
+  return storedCreds();
+}
+
+/**
+ * Persist Pusher creds from the QuickNav settings panel. Empty key
+ * clears the stored override. Takes effect on the next page load (the
+ * Pusher singleton binds once per load — the UI says so).
+ */
+export function savePusherCreds(key: string, cluster: string): void {
+  try {
+    const k = key.trim();
+    if (!k) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ key: k, cluster: cluster.trim() || CHURCH.pusher.cluster }));
+  } catch {
+    /* storage blocked */
+  }
+}
+
 /** Persist `?pusherKey=` / `?pusherCluster=` URL flags (call once at startup). */
 export function adoptPusherUrlFlags(): void {
   try {
